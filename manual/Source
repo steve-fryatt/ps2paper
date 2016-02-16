@@ -1,0 +1,251 @@
+<document title="PS2Paper">
+<define name="version" value="">
+<define name="date" value="" length=30 align="right">
+
+
+
+
+<literal mode="Strong" file="!Root">
+ProcText
+#SpriteFile Sprites
+#Sprite 8,0 Logo
+#Align Right
+{f*/:Automated Text Manipulation†}
+Version $$version$$ ($$date$$)†
+#Below
+#Line
+#Align Centre
+{f/:PS2Paaper} is {f*:Open Source}: please read the <License>
+
+#Indent 2
+#Table Columns 4
+è <Introduction>
+è <Installing ProcText=>Install>
+è <Using ProcText=>Use>
+è <Writing Script Files=>Scripts>
+è <Using the Queue=>Queue>
+è <Setting Choices=>Choices>
+è <Version History=>History>
+#Endtable
+#Indent
+#Line
+#Align Left
+If you have any comments about {f/:PS2Paaper}, or would like to report any bugs that you find, you can email me at the address below.
+
+Updates to {f/:PS2Paaper} and more applications for RISC OS computers can be found on my website at <http://www.stevefryatt.org.uk/software/=>#url>.
+
+#Align Centre
+© Stephen Fryatt, 2016 (<steve@stevefryatt.org.uk=>#url mailto:steve@stevefryatt.org.uk>)
+
+A plain text version of this manual is available <here=>*Filer_Run <P22Paper$HelpText\>>.
+#Align Left
+</literal>
+
+
+
+
+<literal mode="HTML">
+<html>
+<head>
+<title>PS2Paper</title>
+<style type="text/css">
+ DIV.container {
+   background-color: silver;
+   margin: 0;
+ }
+
+ DIV.chapter {
+   color: black;
+   background-color: white;
+   margin: 2em;
+   padding: 1em;
+ }
+</style>
+</head>
+
+<body>
+<div class="container">
+<div class="chapter">
+<h1>PS2Paper</h1>
+</div>
+</literal>
+
+
+
+
+<literal mode="Text">
+=============================================================================
+PS2Paper - Manage PostScript 2 Paper Sizes                       Version $$version$$
+
+(c) Stephen Fryatt, 2016                       $$date$$
+=============================================================================
+</literal>
+
+
+
+<chapter title="Licence" file="Licence">
+
+<cite>PS2Paper</cite> is licensed under the EUPL, Version&nbsp;1.1 only (the "Licence"); you may not use this work except in compliance with the Licence.
+
+You may obtain a copy of the Licence at <link ref="#url http://joinup.ec.europa.eu/software/page/eupl">http://joinup.ec.europa.eu/software/page/eupl</link>
+
+Unless required by applicable law or agreed to in writing, software distributed under the Licence is distributed on an &quot;<strong>as is</strong>&quot; basis, <strong>without warranties or conditions of any kind</strong>, either express or implied.
+
+See the Licence for the specific language governing permissions and limitations under the Licence.
+
+The source for <cite>PS2Paper</cite> can be found alongside this binary download, at <link ref="#url http://www.stevefryatt.org.uk/software">http://www.stevefryatt.org.uk/software</link>
+
+The necessary libraries and build tools can be found at <link ref="#url http://www.stevefryatt.org.uk/software/build">http://www.stevefryatt.org.uk/software/build</link>
+
+</chapter>
+
+
+
+
+<chapter title="Introduction" file="Introduction">
+
+<cite>ProcText</cite> provides versatile and configurable text processing and manipulation facilities, based on a set of pre-programmed actions and a user-configurable search and replace facility.
+
+In addition to this manual, interactive help is fully supported.
+
+</chapter>
+
+
+
+
+<chapter title="Installing ProcText" file="Install">
+
+To install <cite>ProcText</cite>, drag the <file>!ProcText</file> application directory from the archive to a suitable location on your hard disc. Once copied, <cite>ProcText</cite> can be started by double-clicking in the usual way.
+
+<cite>ProcText</cite> is 32-bit neutral, and requires the 32-bit Shared C Library from Castle to be installed.  If you do not have this, it can be obtained from <link ref="#url http://www.iyonix.com/32bit/system.shtml">http://www.iyonix.com/32bit/system.shtml</link> with full installation instructions.
+
+</chapter>
+
+
+
+<chapter title="Using ProcText" file="Use">
+
+Once installed on disc, <cite>ProcText</cite> can be started in the usual way by double-clicking on its application directory to place a copy on the iconbar.
+
+
+</chapter>
+
+
+
+<chapter title="Writing Script Files" file="Scripts">
+
+
+</chapter>
+
+
+
+<chapter title="Version History" file="History">
+
+Here is a list of the versions of <cite>ProcText</cite>, along with all the changes made.
+
+
+<subhead title="Test Build">
+
+Alpha release, for feedback and comment.
+
+<list>
+<li>First Release.
+</list>
+
+</chapter>
+
+
+
+
+
+<literal mode="Strong" file="!Configure">
+# Configure file for StrongHelp
+# Lines starting with "# " are comments (Note the space)
+# Lines starting with "#Commands" and "#End" are *not* comments.
+
+#Commands
+
+# f0  = Sassoon.Primary           14   Bold  1  Italic  2  Both  3
+# f1  = Sassoon.Primary.Bold      14   Bold  1  Italic  2  Both  3
+# f2  = Homerton.Medium.Oblique   14   Bold  1  Italic  2  Both  3
+# f3  = Homerton.Bold.Oblique     14   Bold  1  Italic  2  Both  3
+
+# The Body font
+
+f0  = Trinity.Medium          14   Bold  1  Italic  2  Both  3
+f1  = Trinity.Bold            14   Bold  1  Italic  2  Both  3
+f2  = Trinity.Medium.Italic   14   Bold  1  Italic  2  Both  3
+f3  = Trinity.Bold.Italic     14   Bold  1  Italic  2  Both  3
+f4  = Trinity.Medium          10
+
+# The Headline fonts
+
+f10 = Homerton.Bold           16
+f11 = Homerton.Bold.Oblique   14
+f12 = Trinity.Bold            14
+f13 = Trinity.Bold.Italic     12
+f14 = Trinity.Medium          10
+f15 = Trinity.Medium.Italic   8
+
+# The fonts used for fCode
+
+f20 = Corpus.Medium           14   Bold 21  Italic 22  Both 23
+f21 = Corpus.Bold             14   Bold 21  Italic 22  Both 23
+f22 = Corpus.Medium.Oblique   14   Bold 21  Italic 22  Both 23
+f23 = Corpus.Bold.Oblique     14   Bold 21  Italic 22  Both 23
+
+# Fonts 24 to 31 are reserved for the manuals themselves.
+
+# The styles..
+
+fStd       = f0
+fLink      = f_
+fStrong    = f*
+fEmphasis  = f/
+fUnderline = f_
+fCode      = f20
+fCite      = f/
+
+fH1        = f10
+fH2        = f11
+fH3        = f12
+fH4        = f13
+fH5        = f14
+fH6        = f15
+
+# Set default background and font
+
+#Background rgb 255,255,255
+Background wimp 1
+fStd
+
+#End
+</literal>
+
+
+
+
+<literal mode="HTML">
+</div>
+</body>
+</html>
+</literal>
+
+
+
+
+<literal mode="Text">
+
+
+Updates and Contacting Me
+-------------------------
+
+  If you have any comments about PS2Paper, or would like to report any bugs
+  that you find, you can email me at the address below.
+
+  Updates to PS2Paper and more software for RISC OS computers can be found
+  on my website at http://www.stevefryatt.org.uk/software/
+
+  Stephen Fryatt
+  email: steve@stevefryatt.org.uk
+</literal>
