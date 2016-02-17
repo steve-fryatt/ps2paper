@@ -118,7 +118,7 @@ READMEHDR := Header
 MENUSRC := menudef
 FINDHELPSRC := Help.bbt
 
-OBJS := iconbar.o main.o
+OBJS := iconbar.o main.o ps2paper.o
 
 # Build everything, but don't package it for release.
 

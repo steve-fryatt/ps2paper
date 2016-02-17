@@ -31,7 +31,20 @@ TaskSpr:!ps2paper
 
 SupportURL:http://www.stevefryatt.org.uk/software/
 
+# Papers
+
+PaperFileM:Master
+PaperFileU:User
+PaperFileD:Device
+
+PaperStatMiss:Missing
+PaperStatUnkn:Unknown
+PaperStatOK:Correct
+PaperStatNOK:Incorrect
+
 # Messages and errors
+
+PaperNoMem:There was not enough memory to create the paper list.
 
 # Interactive Help for windows and icons.
 #

@@ -35,7 +35,7 @@ If you have any comments about {f/:PS2Paaper}, or would like to report any bugs 
 Updates to {f/:PS2Paaper} and more applications for RISC OS computers can be found on my website at <http://www.stevefryatt.org.uk/software/=>#url>.
 
 #Align Centre
-© Stephen Fryatt, 2016 (<steve@stevefryatt.org.uk=>#url mailto:steve@stevefryatt.org.uk>)
+© Stephen Fryatt, 2013-2016 (<steve@stevefryatt.org.uk=>#url mailto:steve@stevefryatt.org.uk>)
 
 A plain text version of this manual is available <here=>*Filer_Run <PS2Paper$HelpText\>>.
 #Align Left
@@ -77,7 +77,7 @@ A plain text version of this manual is available <here=>*Filer_Run <PS2Paper$Hel
 =============================================================================
 PS2Paper - Manage PostScript 2 Paper Sizes                       Version $$version$$
 
-(c) Stephen Fryatt, 2016                       $$date$$
+(c) Stephen Fryatt, 2013-2016                  $$date$$
 =============================================================================
 </literal>
 
