@@ -1,0 +1,51 @@
+# Copyright 2016, Stephen Fryatt
+#
+# This file is part of PS2Paper:
+#
+#   http://www.stevefryatt.org.uk/software/
+#
+# Licensed under the EUPL, Version 1.1 only (the "Licence");
+# You may not use this work except in compliance with the
+# Licence.
+#
+# You may obtain a copy of the Licence at:
+#
+#   http://joinup.ec.europa.eu/software/page/eupl
+#
+# Unless required by applicable law or agreed to in
+# writing, software distributed under the Licence is
+# distributed on an "AS IS" basis, WITHOUT WARRANTIES
+# OR CONDITIONS OF ANY KIND, either express or implied.
+#
+# See the Licence for the specific language governing
+# permissions and limitations under the Licence.
+
+# UK Version
+
+# General application details
+
+TaskName:PS2Paper
+Version:%0 (%1)
+
+TaskSpr:!ps2paper
+
+SupportURL:http://www.stevefryatt.org.uk/software/
+
+# Messages and errors
+
+# Interactive Help for windows and icons.
+#
+# Window icon data (particularly toolbar items) may be in menu data when duplicates exist.
+
+Help.IconBar:\TPS2Paper application.|M\Sopen a list of paper sizes.
+
+Help.ProgInfo:\TPS2Paper information \w.
+Help.ProgInfo.Website:\Svisit the PS2Paper website, if you have Internet access.
+
+# Interactive help for menus.
+#
+# Where duplicate menu entries exist, items may be grouped and numbering will not be contiguous.
+
+Help.IconBarMenu.00:\Rsee information about PS2Paper.
+Help.IconBarMenu.01:\Sread the online manual.
+Help.IconBarMenu.02:\Squit PS2Paper.

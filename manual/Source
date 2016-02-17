@@ -10,7 +10,7 @@ ProcText
 #SpriteFile Sprites
 #Sprite 8,0 Logo
 #Align Right
-{f*/:Automated Text Manipulation }
+{f*/:Manage PostScript 2 Paper Sizes }
 Version $$version$$ ($$date$$) 
 #Below
 #Line
@@ -37,7 +37,7 @@ Updates to {f/:PS2Paaper} and more applications for RISC OS computers can be fou
 #Align Centre
 © Stephen Fryatt, 2016 (<steve@stevefryatt.org.uk=>#url mailto:steve@stevefryatt.org.uk>)
 
-A plain text version of this manual is available <here=>*Filer_Run <P22Paper$HelpText\>>.
+A plain text version of this manual is available <here=>*Filer_Run <PS2Paper$HelpText\>>.
 #Align Left
 </literal>
 

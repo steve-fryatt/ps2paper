@@ -21,17 +21,21 @@
  * permissions and limitations under the Licence.
  */
 
-
 /**
- * Icon bar menu.
+ * \file: iconbar.h
+ *
+ * IconBar icon implementation.
  */
 
-menu(IconBarMenu, "PS2 Paper")
-{
-	item("Info") {
-		d_box(ProgInfo);
-	}
-	item("Help");
-	item("Quit");
-}
+#ifndef PROCTEXT_ICONBAR
+#define PROCTEXT_ICONBAR
+
+
+/**
+ * Initialise the iconbar icon and its associated menus and dialogues.
+ */
+
+void iconbar_initialise(void);
+
+#endif
 

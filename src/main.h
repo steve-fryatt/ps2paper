@@ -21,17 +21,29 @@
  * permissions and limitations under the Licence.
  */
 
-
 /**
- * Icon bar menu.
+ * \file: main.h
+ *
+ * Core program code and resource loading.
  */
 
-menu(IconBarMenu, "PS2 Paper")
-{
-	item("Info") {
-		d_box(ProgInfo);
-	}
-	item("Help");
-	item("Quit");
-}
+#ifndef PROCTEXT_MAIN
+#define PROCTEXT_MAIN
+
+
+/**
+ * Application-wide global variables.
+ */
+
+extern wimp_t			main_task_handle;
+extern int			main_quit_flag;
+extern osspriteop_area		*main_wimp_sprites;
+
+/**
+ * Main code entry point.
+ */
+
+int main(int argc, char *argv[]);
+
+#endif
 

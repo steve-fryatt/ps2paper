@@ -1,0 +1,35 @@
+| >!Boot
+|
+| Copyright 2016, Stephen Fryatt
+|
+| This file is part of PS2Paper:
+|
+|   http://www.stevefryatt.org.uk/software/
+|
+| Licensed under the EUPL, Version 1.1 only (the "Licence");
+| You may not use this work except in compliance with the
+| Licence.
+|
+| You may obtain a copy of the Licence at:
+|
+|   http://joinup.ec.europa.eu/software/page/eupl
+|
+| Unless required by applicable law or agreed to in
+| writing, software distributed under the Licence is
+| distributed on an "AS IS" basis, WITHOUT WARRANTIES
+| OR CONDITIONS OF ANY KIND, either express or implied.
+|
+| See the Licence for the specific language governing
+| permissions and limitations under the Licence.
+
+Set PS2Paper$Help <Obey$Dir>.!Help
+Set ProcText$Version "0.10"
+Set ProcText$Web "http://www.stevefryatt.org.uk/software/"
+Set ProcText$Title "ProcText"
+Set ProcText$Publisher "Stephen Fryatt"
+Set ProcText$Description "Automated Text Manipulation"
+
+If "<PS2Paper$Dir>"="" Then Set PS2Paper$Dir <Obey$Dir>
+
+IconSprites <PS2Paper$Dir>.!Sprites
+
