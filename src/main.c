@@ -69,6 +69,7 @@
 #include "main.h"
 
 #include "iconbar.h"
+#include "list.h"
 
 /* ------------------------------------------------------------------------------------------------------------------ */
 
@@ -184,7 +185,7 @@ static void main_initialise(void)
 
 	/* Load the window templates. */
 
-//	sprites = resources_load_user_sprite_area("<PS2Paper$Dir>.Sprites");
+	sprites = resources_load_user_sprite_area("<PS2Paper$Dir>.Sprites");
 
 //	main_wimp_sprites = sprites;
 
@@ -196,6 +197,7 @@ static void main_initialise(void)
 	ihelp_initialise();
 	dataxfer_initialise(main_task_handle, NULL);
 	iconbar_initialise();
+	list_initialise(sprites);
 	url_initialise();
 
 	templates_close();

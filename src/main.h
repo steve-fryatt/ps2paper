@@ -27,8 +27,8 @@
  * Core program code and resource loading.
  */
 
-#ifndef PROCTEXT_MAIN
-#define PROCTEXT_MAIN
+#ifndef PS2PAPER_MAIN
+#define PS2PAPER_MAIN
 
 
 /**

@@ -27,8 +27,8 @@
  * IconBar icon implementation.
  */
 
-#ifndef PROCTEXT_ICONBAR
-#define PROCTEXT_ICONBAR
+#ifndef PS2PAPER_ICONBAR
+#define PS2PAPER_ICONBAR
 
 
 /**

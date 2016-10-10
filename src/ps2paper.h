@@ -27,8 +27,8 @@
  * Postscript 2 paper dialogue implementation.
  */
 
-#ifndef PRINTPDF_PS2PAPER
-#define PRINTPDF_PS2PAPER
+#ifndef PS2PAPER_PS2PAPER
+#define PS2PAPER_PS2PAPER
 
 
 //enum paper_units {

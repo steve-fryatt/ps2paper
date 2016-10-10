@@ -52,6 +52,7 @@
 
 #include "iconbar.h"
 
+#include "list.h"
 #include "main.h"
 
 #define URL_LENGTH 256
@@ -128,7 +129,7 @@ static void iconbar_click_handler(wimp_pointer *pointer)
 
 	switch (pointer->buttons) {
 	case wimp_CLICK_SELECT:
-//		bookmark_create_new_window();
+		list_open_window();
 		break;
 
 	case wimp_CLICK_ADJUST:
