@@ -70,6 +70,7 @@
 
 #include "iconbar.h"
 #include "list.h"
+#include "paper.h"
 
 /* ------------------------------------------------------------------------------------------------------------------ */
 
@@ -197,6 +198,7 @@ static void main_initialise(void)
 	ihelp_initialise();
 	dataxfer_initialise(main_task_handle, NULL);
 	iconbar_initialise();
+	paper_initialise();
 	list_initialise(sprites);
 	url_initialise();
 

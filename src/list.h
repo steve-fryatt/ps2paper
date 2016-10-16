@@ -60,5 +60,13 @@ void list_initialise(osspriteop_area *sprites);
 
 void list_open_window(void);
 
-#endif
 
+/**
+ * Set the number of visible lines in the list window.
+ *
+ * \param lines			The number of lines to be displayed.
+ */
+
+void list_set_lines(int lines);
+
+#endif
