@@ -33,36 +33,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/* Acorn C header files */
+
+#include "flex.h"
+
 /* OSLib header files */
 
-#include "oslib/wimp.h"
-#include "oslib/os.h"
-#include "oslib/osbyte.h"
-#include "oslib/osspriteop.h"
-#include "oslib/uri.h"
 #include "oslib/hourglass.h"
-#include "oslib/pdriver.h"
-#include "oslib/help.h"
+#include "oslib/wimp.h"
 
 /* SF-Lib header files. */
 
 #include "sflib/config.h"
 #include "sflib/dataxfer.h"
-#include "sflib/resources.h"
-#include "sflib/heap.h"
-#include "sflib/windows.h"
-#include "sflib/icons.h"
-#include "sflib/ihelp.h"
-#include "sflib/menus.h"
-#include "sflib/url.h"
-#include "sflib/msgs.h"
-#include "sflib/debug.h"
-#include "sflib/config.h"
 #include "sflib/errors.h"
-#include "sflib/string.h"
-#include "sflib/colpick.h"
 #include "sflib/event.h"
+#include "sflib/heap.h"
+#include "sflib/ihelp.h"
+#include "sflib/msgs.h"
+#include "sflib/resources.h"
 #include "sflib/templates.h"
+#include "sflib/url.h"
 
 /* Application header files */
 
@@ -170,6 +161,11 @@ static void main_initialise(void)
 
 	event_add_message_handler(message_QUIT, EVENT_MESSAGE_INCOMING, main_message_quit);
 	event_add_message_handler(message_PRE_QUIT, EVENT_MESSAGE_INCOMING, main_message_prequit);
+
+	/* Initialise the flex heap. */
+
+	flex_init(task_name, 0, 0);
+	heap_initialise();
 
 	/* Initialise the configuration. */
 
