@@ -15,7 +15,7 @@ Version $$version$$ ($$date$$) 
 #Below
 #Line
 #Align Centre
-{f/:PS2Paaper} is {f*:Open Source}: please read the <Licence>
+{f/:PS2Paper} is {f*:Open Source}: please read the <Licence>
 
 #Indent 2
 #Table Columns 4
@@ -30,9 +30,9 @@ Version $$version$$ ($$date$$) 
 #Indent
 #Line
 #Align Left
-If you have any comments about {f/:PS2Paaper}, or would like to report any bugs that you find, you can email me at the address below.
+If you have any comments about {f/:PS2Paper}, or would like to report any bugs that you find, you can email me at the address below.
 
-Updates to {f/:PS2Paaper} and more applications for RISC OS computers can be found on my website at <http://www.stevefryatt.org.uk/software/=>#url>.
+Updates to {f/:PS2Paper} and more applications for RISC OS computers can be found on my website at <http://www.stevefryatt.org.uk/software/=>#url>.
 
 #Align Centre
 © Stephen Fryatt, 2013-2016 (<steve@stevefryatt.org.uk=>#url mailto:steve@stevefryatt.org.uk>)
