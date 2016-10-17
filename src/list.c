@@ -37,6 +37,7 @@
 
 /* OSLib header files */
 
+#include "oslib/osspriteop.h"
 #include "oslib/wimp.h"
 
 /* SF-Lib header files. */

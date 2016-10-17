@@ -198,8 +198,8 @@ static void main_initialise(void)
 	ihelp_initialise();
 	dataxfer_initialise(main_task_handle, NULL);
 	iconbar_initialise();
-	paper_initialise();
 	list_initialise(sprites);
+	paper_initialise();
 	url_initialise();
 
 	templates_close();
@@ -233,4 +233,3 @@ static osbool main_message_prequit(wimp_message *message)
 
 	return TRUE;
 }
-

@@ -44,7 +44,7 @@
 /* SF-Lib header files. */
 
 //#include "sflib/config.h"
-//#include "sflib/debug.h"
+#include "sflib/debug.h"
 //#include "sflib/errors.h"
 //#include "sflib/event.h"
 //#include "sflib/icons.h"
@@ -59,8 +59,16 @@
 
 #include "paper.h"
 
+#include "list.h"
+
 #define PAPER_NAME_LEN 128
 #define PAPER_SOURCE_LEN 32
+
+enum paper_source {
+	PAPER_SOURCE_MASTER,
+	PAPER_SOURCE_USER,
+	PAPER_SOURCE_DEVICE
+};
 
 enum paper_status {
 	PAPER_STATUS_MISSING,				/**< There is no file for the paper size.	*/
@@ -74,19 +82,19 @@ struct paper_size {
 	char			name[PAPER_NAME_LEN];	/**< The Printers name for the paper		*/
 	int			width;				/**< The Printers width of the paper		*/
 	int			height;				/**< The Printers height of the paper		*/
-	char			source[PAPER_SOURCE_LEN];	/**< The name of the source file		*/
+	enum paper_source	source;				/**< The name of the source file		*/
 	char			ps2_file[PAPER_NAME_LEN];	/**< The associated PS2 Paper file, or ""	*/
 	enum paper_status	ps2_file_status;		/**< Indicate the status of the Paper File.	*/
 
 	struct paper_size	*next;				/**< Link to the next paper size.		*/
 };
 
-static struct ps2paper_size	*paper_sizes = NULL;		/**< Linked list of paper sizes.		*/
+static struct paper_size	*paper_sizes = NULL;		/**< Linked list of paper sizes.		*/
 static unsigned			paper_count = 0;		/**< Number of defined paper sizes.		*/
 
 static void			paper_clear_definitions(void);
 static void			paper_read_definitions(void);
-static osbool			paper_read_def_file(char *file, char *source);
+static osbool			paper_read_def_file(char *file, enum paper_source source);
 static osbool			paper_update_files(void);
 static enum paper_status	paper_read_pagesize(struct paper_size *paper, char *file);
 static osbool			paper_write_pagesize(struct paper_size *paper, char *file_path);
@@ -99,7 +107,7 @@ static osbool			paper_write_pagesize(struct paper_size *paper, char *file_path);
 
 void paper_initialise(void)
 {
-	
+	paper_read_definitions();
 }
 
 
@@ -108,33 +116,29 @@ void paper_initialise(void)
 
 static void paper_read_definitions(void)
 {
-	struct paper_size	*paper;
-	int			i;
-	char			source[PAPER_SOURCE_LEN];
+//	struct paper_size	*paper;
+//	int			i;
 
 	paper_clear_definitions();
 
-	msgs_lookup("PaperFileM", source, PAPER_SOURCE_LEN);
-	paper_read_def_file("Printers:PaperRO", source);
-	msgs_lookup("PaperFileU", source, PAPER_SOURCE_LEN);
-	paper_read_def_file("PrinterChoices:PaperRW", source);
-	msgs_lookup("PaperFileD", source, PAPER_SOURCE_LEN);
-	paper_read_def_file("Printers:ps.Resources.PaperRO", source);
+	paper_read_def_file("Printers:PaperRO", PAPER_SOURCE_MASTER);
+	paper_read_def_file("PrinterChoices:PaperRW", PAPER_SOURCE_USER);
+	paper_read_def_file("Printers:ps.Resources.PaperRO", PAPER_SOURCE_DEVICE);
 
-	redraw_list = malloc(paper_count * sizeof(struct paper_size *));
-	if (redraw_list == NULL) {
-		error_msgs_report_error("PaperNoMem");
-		paper_clear_definitions();
-		return;
-	}
+//	redraw_list = malloc(paper_count * sizeof(struct paper_size *));
+//	if (redraw_list == NULL) {
+//		error_msgs_report_error("PaperNoMem");
+//		paper_clear_definitions();
+//		return;
+//	}
 
-	paper = paper_sizes;
-	i = paper_count;
+//	paper = paper_sizes;
+//	i = paper_count;
 
-	while (i > 0 && paper != NULL) {
-		redraw_list[--i] = paper;
-		paper = paper->next;
-	}
+//	while (i > 0 && paper != NULL) {
+//		redraw_list[--i] = paper;
+//		paper = paper->next;
+//	}
 
 	/* Set the window extent. */
 
@@ -161,10 +165,10 @@ static void paper_clear_definitions(void)
  * and adding them to the list of sizes.
  *
  * \param *file		The name of the file to be read in.
- * \param *source	The "user facing" name for the file.
+ * \param source	The type of file being read.
  */
 
-static osbool paper_read_def_file(char *file, char *source)
+static osbool paper_read_def_file(char *file, enum paper_source source)
 {
 	FILE			*in;
 	char			line[1024], *clean, *data, paper_name[PAPER_NAME_LEN];
@@ -208,9 +212,11 @@ static osbool paper_read_def_file(char *file, char *source)
 		if (paper_name != '\0' && paper_width != 0 && paper_height != 0) {
 			paper_definition = malloc(sizeof(struct paper_size));
 
+			debug_printf("Found paper definition: %s, %d x %d", paper_name, paper_width, paper_height);
+
 			if (paper_definition != NULL) {
 				strncpy(paper_definition->name, paper_name, PAPER_NAME_LEN);
-				strncpy(paper_definition->source, source, PAPER_SOURCE_LEN);
+				paper_definition->source = source;
 				paper_definition->width = paper_width;
 				paper_definition->height = paper_height;
 
