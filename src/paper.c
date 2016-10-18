@@ -35,6 +35,8 @@
 
 /* Acorn C header files */
 
+#include "flex.h"
+
 /* OSLib header files */
 
 #include "oslib/fileswitch.h"
@@ -61,8 +63,12 @@
 
 #include "list.h"
 
+#define PAPER_MAX_LINE_LEN 1024
+
 #define PAPER_NAME_LEN 128
 #define PAPER_SOURCE_LEN 32
+
+#define PAPER_STORAGE_ALLOCATION 4
 
 enum paper_source {
 	PAPER_SOURCE_MASTER,
@@ -89,11 +95,13 @@ struct paper_size {
 	struct paper_size	*next;				/**< Link to the next paper size.		*/
 };
 
-static struct paper_size	*paper_sizes = NULL;		/**< Linked list of paper sizes.		*/
-static unsigned			paper_count = 0;		/**< Number of defined paper sizes.		*/
+static struct paper_size	*paper_sizes = NULL;		/**< Linked list of paper sizes.				*/
+static unsigned			paper_allocation = 0;		/**< The number of spaces allocated for paper definitions.	*/
+static unsigned			paper_count = 0;		/**< Number of defined paper sizes.				*/
 
-static void			paper_clear_definitions(void);
 static void			paper_read_definitions(void);
+static void			paper_clear_definitions(void);
+static osbool			paper_allocate_definition_space(unsigned new_allocation);
 static osbool			paper_read_def_file(char *file, enum paper_source source);
 static osbool			paper_update_files(void);
 static enum paper_status	paper_read_pagesize(struct paper_size *paper, char *file);
@@ -107,12 +115,15 @@ static osbool			paper_write_pagesize(struct paper_size *paper, char *file_path);
 
 void paper_initialise(void)
 {
+	paper_clear_definitions();
 	paper_read_definitions();
 }
 
 
-
-
+/**
+ * Reset the paper definitions, then read them back in from the source
+ * files in Printers.
+ */
 
 static void paper_read_definitions(void)
 {
@@ -145,33 +156,65 @@ static void paper_read_definitions(void)
 	list_set_lines(paper_count);
 }
 
+
+/**
+ * Clear the paper definitions and release the memory used to hold them.
+ * Calling this function will also initialise the flex block and
+ * associated variables.
+ */
+
 static void paper_clear_definitions(void)
 {
-	struct paper_size	*paper, *current;
+	if (flex_alloc((flex_ptr) &paper_sizes, 4) == 0)
+		paper_sizes = NULL;
 
-	paper = paper_sizes;
-	paper_sizes = NULL;
 	paper_count = 0;
+	paper_allocation = 0;
 
-	while (paper != NULL) {
-		current = paper;
-		paper = paper->next;
-		free(current);
-	}
+	debug_printf("Paper storage reset to zero");
 }
+
+
+/**
+ * Claim additional storage space for paper definitions.
+ * 
+ * \param new_allocation	The number of storage places required.
+ * \return			TRUE if successful; FALSE if allocation failed.
+ */
+
+static osbool paper_allocate_definition_space(unsigned new_allocation)
+{
+	if (new_allocation <= paper_allocation)
+		return TRUE;
+
+	new_allocation = ((new_allocation / PAPER_STORAGE_ALLOCATION) + 1) * PAPER_STORAGE_ALLOCATION;
+
+	debug_printf("Requesting new allocation of %d spaces", new_allocation);
+
+	if (flex_alloc((flex_ptr) &paper_sizes, new_allocation * sizeof(struct paper_size)) == 0)
+		return FALSE;
+
+	paper_allocation = new_allocation;
+
+	debug_printf("Allocation successful");
+
+	return TRUE;
+}
+
 
 /**
  * Process the contents of a Printers paper file, reading the paper definitions
  * and adding them to the list of sizes.
  *
- * \param *file		The name of the file to be read in.
- * \param source	The type of file being read.
+ * \param *file			The name of the file to be read in.
+ * \param source		The type of file being read.
+ * \return			TRUE on success; FALSE on failure.
  */
 
 static osbool paper_read_def_file(char *file, enum paper_source source)
 {
 	FILE			*in;
-	char			line[1024], *clean, *data, paper_name[PAPER_NAME_LEN];
+	char			line[PAPER_MAX_LINE_LEN], *clean, *data, paper_name[PAPER_NAME_LEN];
 	int			i;
 	unsigned		paper_width, paper_height;
 	struct paper_size	*paper_definition;
@@ -191,7 +234,7 @@ static osbool paper_read_def_file(char *file, enum paper_source source)
 	paper_width = 0;
 	paper_height = 0;
 
-	while (fgets(line, sizeof(line), in) != NULL) {
+	while (fgets(line, PAPER_MAX_LINE_LEN, in) != NULL) {
 		string_ctrl_zero_terminate(line);
 		clean = string_strip_surrounding_whitespace(line);
 
@@ -210,11 +253,15 @@ static osbool paper_read_def_file(char *file, enum paper_source source)
 		}
 
 		if (paper_name != '\0' && paper_width != 0 && paper_height != 0) {
-			paper_definition = malloc(sizeof(struct paper_size));
-
 			debug_printf("Found paper definition: %s, %d x %d", paper_name, paper_width, paper_height);
 
-			if (paper_definition != NULL) {
+			paper_allocate_definition_space(paper_count + 1);
+
+			if (paper_count < paper_allocation) {
+				debug_printf("Storing as definition %d", paper_count + 1);
+
+				paper_definition = paper_sizes + paper_count;
+
 				strncpy(paper_definition->name, paper_name, PAPER_NAME_LEN);
 				paper_definition->source = source;
 				paper_definition->width = paper_width;
@@ -229,15 +276,13 @@ static osbool paper_read_def_file(char *file, enum paper_source source)
 				string_tolower(paper_definition->ps2_file);
 
 				if (paper_definition->ps2_file[0] != '\0') {
-					snprintf(line, sizeof(line), "Printers:ps.Paper.%s", paper_definition->ps2_file);
+					snprintf(line, PAPER_MAX_LINE_LEN, "Printers:ps.Paper.%s", paper_definition->ps2_file);
+					line[PAPER_MAX_LINE_LEN - 1] = '\0';
 					error = xosfile_read_no_path(line, &type, NULL, NULL, NULL, NULL);
 
 					if (error == NULL && type == fileswitch_IS_FILE)
 						paper_definition->ps2_file_status = paper_read_pagesize(paper_definition, line);
 				}
-
-				paper_definition->next = paper_sizes;
-				paper_sizes = paper_definition;
 
 				paper_count++;
 			}
