@@ -44,6 +44,7 @@
 
 #include "sflib/errors.h"
 #include "sflib/event.h"
+#include "sflib/icons.h"
 #include "sflib/ihelp.h"
 #include "sflib/templates.h"
 #include "sflib/windows.h"
@@ -52,11 +53,15 @@
 
 #include "list.h"
 
+#include "paper.h"
+
 #define LIST_TOOLBAR_HEIGHT 132						/**< The height of the toolbar in OS units.				*/
 #define LIST_LINE_HEIGHT 56						/**< The height of a results line, in OS units.				*/
 #define LIST_WINDOW_MARGIN 4						/**< The margin around the edge of the window, in OS units.		*/
 #define LIST_LINE_OFFSET 4						/**< The offset from the base of a line to the base of the icon.	*/
 #define LIST_ICON_HEIGHT 52						/**< The height of an icon in the results window, in OS units.		*/
+
+#define LIST_ICON_BUFFER_LEN 128					/**< The scratch buffer used for formatting text for display.		*/
 
 #define LIST_NAME_ICON 0
 #define LIST_WIDTH_ICON 1
@@ -67,15 +72,26 @@
 #define LIST_UNKNOWN1_ICON 6
 #define LIST_UNKNOWN2_ICON 7
 
-static wimp_window	*list_window_def = NULL;	/**< The list window definition.	*/
-static wimp_window	*list_pane_def = NULL;		/**> The list pane definition.		*/
+#define LIST_INCH_ICON 14
+#define LIST_MM_ICON 15
+#define LIST_POINT_ICON 16
 
-static wimp_w		list_window = NULL;		/**< The list window handle.		*/
-static wimp_w		list_pane = NULL;		/**< The list pane handle.		*/
+enum list_units {
+	LIST_UNITS_MM = 0,
+	LIST_UNITS_INCH = 1,
+	LIST_UNITS_POINT = 2
+};
 
+static wimp_window	*list_window_def = NULL;	/**< The list window definition.		*/
+static wimp_window	*list_pane_def = NULL;		/**> The list pane definition.			*/
+
+static wimp_w		list_window = NULL;		/**< The list window handle.			*/
+static wimp_w		list_pane = NULL;		/**< The list pane handle.			*/
+
+static enum list_units	list_display_units;		/**< The units used to display paper sizes.	*/
 
 static void list_redraw_handler(wimp_draw *redraw);
-
+static void list_toolbar_click_handler(wimp_pointer *pointer);
 
 /* Line position calculations.
  *
@@ -116,6 +132,8 @@ void list_initialise(osspriteop_area *sprites)
 
 	list_pane_def->sprite_area = sprites;
 
+	list_display_units = LIST_UNITS_MM;
+
 	windows_place_as_toolbar(list_window_def, list_pane_def, LIST_TOOLBAR_HEIGHT - 4);
 
 	error = xwimp_create_window(list_window_def, &list_window);
@@ -135,15 +153,13 @@ void list_initialise(osspriteop_area *sprites)
 
 	event_add_window_redraw_event(list_window, list_redraw_handler);
 
-
-//	event_add_window_mouse_event(preset_edit_window, preset_edit_click_handler);
+	event_add_window_mouse_event(list_pane, list_toolbar_click_handler);
 //	event_add_window_key_event(preset_edit_window, preset_edit_keypress_handler);
-//	event_add_window_icon_radio(preset_edit_window, PRESET_EDIT_CARETDATE, TRUE);
-//	event_add_window_icon_radio(preset_edit_window, PRESET_EDIT_CARETFROM, TRUE);
-//	event_add_window_icon_radio(preset_edit_window, PRESET_EDIT_CARETTO, TRUE);
-//	event_add_window_icon_radio(preset_edit_window, PRESET_EDIT_CARETREF, TRUE);
-//	event_add_window_icon_radio(preset_edit_window, PRESET_EDIT_CARETAMOUNT, TRUE);
-//	event_add_window_icon_radio(preset_edit_window, PRESET_EDIT_CARETDESC, TRUE);
+	event_add_window_icon_radio(list_pane, LIST_INCH_ICON, FALSE);
+	event_add_window_icon_radio(list_pane, LIST_MM_ICON, FALSE);
+	event_add_window_icon_radio(list_pane, LIST_POINT_ICON, FALSE);
+
+	icons_set_radio_group_selected(list_pane, list_display_units, 3, LIST_MM_ICON, LIST_INCH_ICON, LIST_POINT_ICON);
 }
 
 
@@ -176,7 +192,7 @@ void list_set_lines(int lines)
 
 	visible_extent = state.yscroll + (state.visible.y0 - state.visible.y1);
 
-	new_extent = -LIST_ICON_HEIGHT * lines;
+	new_extent = -((LIST_ICON_HEIGHT * lines) + LIST_TOOLBAR_HEIGHT);
 
 	if (new_extent > (state.visible.y0 - state.visible.y1))
 		new_extent = state.visible.y0 - state.visible.y1;
@@ -210,6 +226,34 @@ void list_set_lines(int lines)
 
 
 
+/**
+ * Process mouse clicks in the toolbar.
+ *
+ * \param *pointer		The mouse event block to handle.
+ */
+
+static void list_toolbar_click_handler(wimp_pointer *pointer)
+{
+	if (pointer == NULL)
+		return;
+
+	switch ((int) pointer->i) {
+	case LIST_MM_ICON:
+		list_display_units = LIST_UNITS_MM;
+		windows_redraw(list_window);
+		break;
+
+	case LIST_INCH_ICON:
+		list_display_units = LIST_UNITS_INCH;
+		windows_redraw(list_window);
+		break;
+
+	case LIST_POINT_ICON:
+		list_display_units = LIST_UNITS_POINT;
+		windows_redraw(list_window);
+		break;
+	}
+}
 
 
 
@@ -221,24 +265,56 @@ void list_set_lines(int lines)
 
 static void list_redraw_handler(wimp_draw *redraw)
 {
-	int			ox, oy, top, bottom, y, i;
+	struct paper_size	*paper;
+	int			lines, ox, oy, top, bottom, y, i;
 	osbool			more;
 	wimp_icon		*icon;
-	char			validation[255];
+	char			buffer[LIST_ICON_BUFFER_LEN], validation[255], *unit_format, *token;
+	double			unit_scale;
 
 //	handle = (struct results_window *) event_get_window_user_data(redraw->w);
 
 //	if (handle == NULL)
 //		return;
 
+	lines = paper_get_definition_count();
+	paper = paper_get_definitions();
 
 	icon = list_window_def->icons;
+
+	switch (list_display_units) {
+	case LIST_UNITS_MM:
+		unit_scale = 2834.64567;
+		unit_format = "%.1f";
+		break;
+	case LIST_UNITS_INCH:
+		unit_scale = 72000.0;
+		unit_format = "%.3f";
+		break;
+	case LIST_UNITS_POINT:
+	default:
+		unit_scale = 1000.0;
+		unit_format = "%.1f";
+		break;
+	}
 
 	/* Set up the validation string buffer for text+sprite icons. */
 
 	*validation = 'S';
 	icon[LIST_UNKNOWN1_ICON].data.indirected_text.validation = validation;
 	icon[LIST_UNKNOWN2_ICON].data.indirected_text.validation = validation;
+
+	icon[LIST_WIDTH_ICON].data.indirected_text_and_sprite.text = buffer;
+	icon[LIST_WIDTH_ICON].data.indirected_text_and_sprite.size = LIST_ICON_BUFFER_LEN;
+
+	icon[LIST_HEIGHT_ICON].data.indirected_text_and_sprite.text = buffer;
+	icon[LIST_HEIGHT_ICON].data.indirected_text_and_sprite.size = LIST_ICON_BUFFER_LEN;
+
+	icon[LIST_LOCATION_ICON].data.indirected_text_and_sprite.text = buffer;
+	icon[LIST_LOCATION_ICON].data.indirected_text_and_sprite.size = LIST_ICON_BUFFER_LEN;
+
+	icon[LIST_STATUS_ICON].data.indirected_text_and_sprite.text = buffer;
+	icon[LIST_STATUS_ICON].data.indirected_text_and_sprite.size = LIST_ICON_BUFFER_LEN;
 
 	/* Redraw the window. */
 
@@ -256,37 +332,86 @@ static void list_redraw_handler(wimp_draw *redraw)
 			top = 0;
 
 		bottom = ((LIST_LINE_HEIGHT * 1.5) + oy - redraw->clip.y0 - LIST_TOOLBAR_HEIGHT) / LIST_LINE_HEIGHT;
-	//	if (bottom > handle->display_lines)
-	//		bottom = handle->display_lines;
+		if (bottom > lines)
+			bottom = lines;
 
 		for (y = top; y < bottom; y++) {
 			icon[LIST_NAME_ICON].extent.y0 = LINE_Y0(y);
 			icon[LIST_NAME_ICON].extent.y1 = LINE_Y1(y);
-
+			icon[LIST_NAME_ICON].data.indirected_text_and_sprite.text = paper[y].name;
+			icon[LIST_NAME_ICON].data.indirected_text_and_sprite.size = PAPER_NAME_LEN;
 			wimp_plot_icon(&(icon[LIST_NAME_ICON]));
+
 
 			icon[LIST_WIDTH_ICON].extent.y0 = LINE_Y0(y);
 			icon[LIST_WIDTH_ICON].extent.y1 = LINE_Y1(y);
+
+			snprintf(buffer, LIST_ICON_BUFFER_LEN, unit_format, (double) (paper[y].width / unit_scale));
+			buffer[LIST_ICON_BUFFER_LEN - 1] = '\0';
 
 			wimp_plot_icon(&(icon[LIST_WIDTH_ICON]));
 
 			icon[LIST_HEIGHT_ICON].extent.y0 = LINE_Y0(y);
 			icon[LIST_HEIGHT_ICON].extent.y1 = LINE_Y1(y);
 
+			snprintf(buffer, LIST_ICON_BUFFER_LEN, unit_format, (double) (paper[y].height / unit_scale));
+			buffer[LIST_ICON_BUFFER_LEN - 1] = '\0';
+
 			wimp_plot_icon(&(icon[LIST_HEIGHT_ICON]));
 
 			icon[LIST_LOCATION_ICON].extent.y0 = LINE_Y0(y);
 			icon[LIST_LOCATION_ICON].extent.y1 = LINE_Y1(y);
 
+			switch(paper[y].source) {
+			case PAPER_SOURCE_MASTER:
+				token = "PaperFileM";
+				break;
+			case PAPER_SOURCE_DEVICE:
+				token = "PaperFileD";
+				break;
+			case PAPER_SOURCE_USER:
+				token = "PaperFileU";
+				break;
+			default:
+				token = "";
+				break;
+			}
+
+			msgs_lookup(token, buffer, LIST_ICON_BUFFER_LEN);
+			buffer[LIST_ICON_BUFFER_LEN - 1] = '\0';
+
 			wimp_plot_icon(&(icon[LIST_LOCATION_ICON]));
 
 			icon[LIST_FILENAME_ICON].extent.y0 = LINE_Y0(y);
 			icon[LIST_FILENAME_ICON].extent.y1 = LINE_Y1(y);
+			icon[LIST_FILENAME_ICON].data.indirected_text_and_sprite.text = paper[y].ps2_file;
+			icon[LIST_FILENAME_ICON].data.indirected_text_and_sprite.size = PAPER_FILE_LEN;
 
 			wimp_plot_icon(&(icon[LIST_FILENAME_ICON]));
 
 			icon[LIST_STATUS_ICON].extent.y0 = LINE_Y0(y);
 			icon[LIST_STATUS_ICON].extent.y1 = LINE_Y1(y);
+
+			switch(paper[y].ps2_file_status) {
+			case PAPER_STATUS_MISSING:
+				token = "PaperStatMiss";
+				break;
+			case PAPER_STATUS_UNKNOWN:
+				token = "PaperStatUnkn";
+				break;
+			case PAPER_STATUS_CORRECT:
+				token = "PaperStatOK";
+				break;
+			case PAPER_STATUS_INCORRECT:
+				token = "PaperStatNOK";
+				break;
+			default:
+				token = "";
+				break;
+			}
+
+			msgs_lookup(token, buffer, LIST_ICON_BUFFER_LEN);
+			buffer[LIST_ICON_BUFFER_LEN - 1] = '\0';
 
 			wimp_plot_icon(&(icon[LIST_STATUS_ICON]));
 

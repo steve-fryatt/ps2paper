@@ -65,35 +65,8 @@
 
 #define PAPER_MAX_LINE_LEN 1024
 
-#define PAPER_NAME_LEN 128
-#define PAPER_SOURCE_LEN 32
 
 #define PAPER_STORAGE_ALLOCATION 4
-
-enum paper_source {
-	PAPER_SOURCE_MASTER,
-	PAPER_SOURCE_USER,
-	PAPER_SOURCE_DEVICE
-};
-
-enum paper_status {
-	PAPER_STATUS_MISSING,				/**< There is no file for the paper size.	*/
-	PAPER_STATUS_UNKNOWN,				/**< There is a file, but it's not one of ours.	*/
-	PAPER_STATUS_CORRECT,				/**< There is a file, and it matches the paper.	*/
-	PAPER_STATUS_INCORRECT				/**< There is a file, but the size is wrong.	*/
-};
-
-
-struct paper_size {
-	char			name[PAPER_NAME_LEN];	/**< The Printers name for the paper		*/
-	int			width;				/**< The Printers width of the paper		*/
-	int			height;				/**< The Printers height of the paper		*/
-	enum paper_source	source;				/**< The name of the source file		*/
-	char			ps2_file[PAPER_NAME_LEN];	/**< The associated PS2 Paper file, or ""	*/
-	enum paper_status	ps2_file_status;		/**< Indicate the status of the Paper File.	*/
-
-	struct paper_size	*next;				/**< Link to the next paper size.		*/
-};
 
 static struct paper_size	*paper_sizes = NULL;		/**< Linked list of paper sizes.				*/
 static unsigned			paper_allocation = 0;		/**< The number of spaces allocated for paper definitions.	*/
@@ -156,6 +129,16 @@ static void paper_read_definitions(void)
 	list_set_lines(paper_count);
 }
 
+
+int paper_get_definition_count(void)
+{
+	return paper_count;
+}
+
+struct paper_size *paper_get_definitions(void)
+{
+	return paper_sizes;
+}
 
 /**
  * Clear the paper definitions and release the memory used to hold them.
@@ -267,7 +250,7 @@ static osbool paper_read_def_file(char *file, enum paper_source source)
 				paper_definition->width = paper_width;
 				paper_definition->height = paper_height;
 
-				for (i = 0; i < PAPER_NAME_LEN && paper_name[i] != '\0' && paper_name[i] != ' '; i++)
+				for (i = 0; i < PAPER_FILE_LEN && paper_name[i] != '\0' && paper_name[i] != ' '; i++)
 					paper_definition->ps2_file[i] = paper_name[i];
 
 				paper_definition->ps2_file[i] = '\0';
@@ -324,14 +307,14 @@ static osbool paper_update_files(void)
 	if (osfile_read_no_path(file_path, NULL, NULL, NULL, NULL) == fileswitch_NOT_FOUND)
 		osfile_create_dir(file_path, 0);
 
-	paper = paper_sizes;
+//	paper = paper_sizes;
 
-	while (paper != NULL) {
-		if (paper->ps2_file_status == PAPER_STATUS_MISSING || paper->ps2_file_status == PAPER_STATUS_INCORRECT)
-			paper_write_pagesize(paper, file_path);
+//	while (paper != NULL) {
+//		if (paper->ps2_file_status == PAPER_STATUS_MISSING || paper->ps2_file_status == PAPER_STATUS_INCORRECT)
+//			paper_write_pagesize(paper, file_path);
 
-		paper = paper->next;
-	}
+//		paper = paper->next;
+//	}
 
 	return TRUE;
 }
