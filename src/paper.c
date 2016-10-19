@@ -245,6 +245,8 @@ static osbool paper_read_def_file(char *file, enum paper_source source)
 
 				paper_definition = paper_sizes + paper_count;
 
+				debug_printf("Block head: 0x%x, definition: 0x%x", paper_sizes, paper_definition);
+
 				strncpy(paper_definition->name, paper_name, PAPER_NAME_LEN);
 				paper_definition->source = source;
 				paper_definition->width = paper_width;
