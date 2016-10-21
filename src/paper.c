@@ -45,17 +45,8 @@
 
 /* SF-Lib header files. */
 
-//#include "sflib/config.h"
 #include "sflib/debug.h"
-//#include "sflib/errors.h"
-//#include "sflib/event.h"
-//#include "sflib/icons.h"
-//#include "sflib/ihelp.h"
-//#include "sflib/menus.h"
-//#include "sflib/msgs.h"
 #include "sflib/string.h"
-//#include "sflib/templates.h"
-//#include "sflib/windows.h"
 
 /* Application header files */
 
@@ -63,8 +54,15 @@
 
 #include "list.h"
 
+/**
+ * The maximum length of a paper definition file line.
+ */
+
 #define PAPER_MAX_LINE_LEN 1024
 
+/**
+ * The number of paper spaces that we allocate on each change in flex heap.
+ */
 
 #define PAPER_STORAGE_ALLOCATION 4
 

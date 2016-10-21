@@ -126,6 +126,7 @@ static void list_toolbar_click_handler(wimp_pointer *pointer);
 void list_initialise(osspriteop_area *sprites)
 {
 	os_error	*error;
+	int		icon;
 
 	list_window_def = templates_load_window("Paper");
 	list_pane_def = templates_load_window("PaperTB");
@@ -160,6 +161,11 @@ void list_initialise(osspriteop_area *sprites)
 	event_add_window_icon_radio(list_pane, LIST_POINT_ICON, FALSE);
 
 	icons_set_radio_group_selected(list_pane, list_display_units, 3, LIST_MM_ICON, LIST_INCH_ICON, LIST_POINT_ICON);
+
+	for (icon = 0; icon <= LIST_STATUS_ICON; icon++) {
+		list_window_def->icons[icon].extent.x0 = list_pane_def->icons[icon + 7].extent.x0 + (LIST_LINE_OFFSET / 2);
+		list_window_def->icons[icon].extent.x1 = list_pane_def->icons[icon + 7].extent.x1 - (LIST_LINE_OFFSET / 2);
+	}
 }
 
 
@@ -324,9 +330,6 @@ static void list_redraw_handler(wimp_draw *redraw)
 	oy = redraw->box.y1 - redraw->yscroll;
 
 	while (more) {
-	//	icon[RESULTS_ICON_FILE].extent.x1 = handle->format_width - RESULTS_WINDOW_MARGIN;
-	//	icon[RESULTS_ICON_SIZE].extent.x1 = handle->format_width - RESULTS_WINDOW_MARGIN;
-
 		top = (oy - redraw->clip.y1 - LIST_TOOLBAR_HEIGHT) / LIST_LINE_HEIGHT;
 		if (top < 0)
 			top = 0;
