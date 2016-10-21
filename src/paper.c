@@ -88,6 +88,9 @@ static osbool			paper_write_pagesize(struct paper_size *paper, char *file_path);
 
 void paper_initialise(void)
 {
+	if (flex_alloc((flex_ptr) &paper_sizes, 4) == 0)
+		paper_sizes = NULL;
+
 	paper_clear_definitions();
 	paper_read_definitions();
 }
@@ -101,7 +104,7 @@ void paper_initialise(void)
 static void paper_read_definitions(void)
 {
 //	struct paper_size	*paper;
-//	int			i;
+	int			i;
 
 	paper_clear_definitions();
 
@@ -127,6 +130,10 @@ static void paper_read_definitions(void)
 	/* Set the window extent. */
 
 	list_set_lines(paper_count);
+
+	for (i = 0; i < paper_count; i++) {
+		debug_printf("Found paper: %s", paper_sizes[i].name);
+	}
 }
 
 
@@ -148,13 +155,14 @@ struct paper_size *paper_get_definitions(void)
 
 static void paper_clear_definitions(void)
 {
-	if (flex_alloc((flex_ptr) &paper_sizes, 4) == 0)
-		paper_sizes = NULL;
-
 	paper_count = 0;
 	paper_allocation = 0;
 
-	debug_printf("Paper storage reset to zero");
+	if (paper_sizes == NULL)
+		return;
+
+	if (flex_extend((flex_ptr) &paper_sizes, 4) == 0)
+		paper_sizes = NULL;
 }
 
 
@@ -167,6 +175,9 @@ static void paper_clear_definitions(void)
 
 static osbool paper_allocate_definition_space(unsigned new_allocation)
 {
+	if (paper_sizes == NULL)
+		return FALSE;
+
 	if (new_allocation <= paper_allocation)
 		return TRUE;
 
@@ -174,7 +185,7 @@ static osbool paper_allocate_definition_space(unsigned new_allocation)
 
 	debug_printf("Requesting new allocation of %d spaces", new_allocation);
 
-	if (flex_alloc((flex_ptr) &paper_sizes, new_allocation * sizeof(struct paper_size)) == 0)
+	if (flex_extend((flex_ptr) &paper_sizes, new_allocation * sizeof(struct paper_size)) == 0)
 		return FALSE;
 
 	paper_allocation = new_allocation;
@@ -241,11 +252,7 @@ static osbool paper_read_def_file(char *file, enum paper_source source)
 			paper_allocate_definition_space(paper_count + 1);
 
 			if (paper_count < paper_allocation) {
-				debug_printf("Storing as definition %d", paper_count + 1);
-
 				paper_definition = paper_sizes + paper_count;
-
-				debug_printf("Block head: 0x%x, definition: 0x%x", paper_sizes, paper_definition);
 
 				strncpy(paper_definition->name, paper_name, PAPER_NAME_LEN);
 				paper_definition->source = source;
