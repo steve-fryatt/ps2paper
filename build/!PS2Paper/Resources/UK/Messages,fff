@@ -44,6 +44,7 @@ PaperStatNOK:Incorrect
 
 # Messages and errors
 
+NoSprites:The application sprites file could not be opened.
 PaperNoMem:There was not enough memory to create the paper list.
 
 # Interactive Help for windows and icons.

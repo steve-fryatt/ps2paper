@@ -183,6 +183,8 @@ static void main_initialise(void)
 	/* Load the window templates. */
 
 	sprites = resources_load_user_sprite_area("<PS2Paper$Dir>.Sprites");
+	if (sprites == NULL)
+		error_msgs_report_fatal("NoSprites");
 
 //	main_wimp_sprites = sprites;
 
