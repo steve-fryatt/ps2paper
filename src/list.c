@@ -85,6 +85,9 @@
 #define LIST_MM_ICON 10
 #define LIST_POINT_ICON 11
 
+#define LIST_MENU_SELECT_ALL 0
+#define LIST_MENU_CLEAR_SELECTION 1
+
 enum list_units {
 	LIST_UNITS_MM = 0,
 	LIST_UNITS_INCH = 1,
@@ -108,22 +111,29 @@ struct list_redraw {
 	enum paper_source	source;
 };
 
-static wimp_window		*list_window_def = NULL;	/**< The list window definition.		*/
-static wimp_window		*list_pane_def = NULL;		/**< The list pane definition.			*/
+static wimp_window		*list_window_def = NULL;		/**< The list window definition.			*/
+static wimp_window		*list_pane_def = NULL;			/**< The list pane definition.				*/
 
-static wimp_w			list_window = NULL;		/**< The list window handle.			*/
-static wimp_w			list_pane = NULL;		/**< The list pane handle.			*/
+static wimp_w			list_window = NULL;			/**< The list window handle.				*/
+static wimp_w			list_pane = NULL;			/**< The list pane handle.				*/
 
-static enum list_units		list_display_units;		/**< The units used to display paper sizes.	*/
+static wimp_menu		*list_window_menu = NULL;		/**< The list window menu.				*/
 
-static struct list_redraw	*list_index = NULL;		/**< The window redraw index.			*/
-static size_t			list_index_count = 0;		/**< The number of entries in the redraw index.	*/
+static enum list_units		list_display_units;			/**< The units used to display paper sizes.		*/
 
-static int			list_selection_count = 0;	/**< The number of selected lines.		*/
-static int			list_selection_row = -1;	/**< The currently selected row, or -1.		*/
+static struct list_redraw	*list_index = NULL;			/**< The window redraw index.				*/
+static size_t			list_index_count = 0;			/**< The number of entries in the redraw index.		*/
+
+static int			list_selection_count = 0;		/**< The number of selected lines.			*/
+static int			list_selection_row = -1;		/**< The currently selected row, or -1.			*/
+static osbool			list_selection_from_menu = FALSE;	/**< TRUE if the selection came from the menu opening.	*/
 
 static void list_click_handler(wimp_pointer *pointer);
 static void list_toolbar_click_handler(wimp_pointer *pointer);
+static void list_menu_prepare(wimp_w w, wimp_menu *menu, wimp_pointer *pointer);
+static void list_menu_warning(wimp_w w, wimp_menu *menu, wimp_message_menu_warning *warning);
+static void list_menu_selection(wimp_w w, wimp_menu *menu, wimp_selection *selection);
+static void list_menu_close(wimp_w w, wimp_menu *menu);
 static void list_redraw_handler(wimp_draw *redraw);
 static void list_add_paper_source_to_index(enum paper_source source, size_t index_lines, struct paper_size *paper, size_t paper_lines);
 static int list_calculate_window_click_row(os_coord *pos, wimp_window_state *state);
@@ -168,6 +178,9 @@ void list_initialise(osspriteop_area *sprites)
 	os_error	*error;
 	int		icon;
 
+	list_window_menu = templates_get_menu("ListWindowMenu");
+	ihelp_add_menu(list_window_menu, "ListWindowMenu");
+
 	list_window_def = templates_load_window("Paper");
 	list_pane_def = templates_load_window("PaperTB");
 
@@ -193,11 +206,22 @@ void list_initialise(osspriteop_area *sprites)
 	ihelp_add_window(list_window, "List", NULL);
 	ihelp_add_window(list_pane, "ListTB", NULL);
 
+	event_add_window_menu(list_window, list_window_menu);
 	event_add_window_redraw_event(list_window, list_redraw_handler);
 	event_add_window_mouse_event(list_window, list_click_handler);
+	event_add_window_menu_prepare(list_window, list_menu_prepare);
+//	event_add_window_menu_warning(list_window, list_menu_warning);
+	event_add_window_menu_selection(list_window, list_menu_selection);
+	event_add_window_menu_close(list_window, list_menu_close);
 
+
+	event_add_window_menu(list_pane, list_window_menu);
 	event_add_window_mouse_event(list_pane, list_toolbar_click_handler);
-//	event_add_window_key_event(preset_edit_window, preset_edit_keypress_handler);
+//	event_add_window_key_event(list_pane, preset_edit_keypress_handler);
+	event_add_window_menu_prepare(list_pane, list_menu_prepare);
+//	event_add_window_menu_warning(list_pane, list_menu_warning);
+	event_add_window_menu_selection(list_pane, list_menu_selection);
+	event_add_window_menu_close(list_pane, list_menu_close);
 	event_add_window_icon_radio(list_pane, LIST_INCH_ICON, FALSE);
 	event_add_window_icon_radio(list_pane, LIST_MM_ICON, FALSE);
 	event_add_window_icon_radio(list_pane, LIST_POINT_ICON, FALSE);
@@ -294,6 +318,177 @@ static void list_toolbar_click_handler(wimp_pointer *pointer)
 		break;
 	}
 }
+
+
+
+
+
+
+
+/**
+ * Prepare the list window menu for (re)-opening.
+ *
+ * \param  w			The handle of the menu's parent window.
+ * \param  *menu		Pointer to the menu being opened.
+ * \param  *pointer		Pointer to the Wimp Pointer event block.
+ */
+
+static void list_menu_prepare(wimp_w w, wimp_menu *menu, wimp_pointer *pointer)
+{
+	wimp_window_state	state;
+	int			row;
+
+
+	if (pointer != NULL) {
+		state.w = pointer->w;
+		if (xwimp_get_window_state(&state) != NULL)
+			return;
+
+		row = list_calculate_window_click_row(&(pointer->pos), &state);
+		if (list_selection_count == 0) {
+			list_select_click_select(row);
+			list_selection_from_menu = TRUE;
+		} else {
+			list_selection_from_menu = FALSE;
+		}
+	}
+
+/*	menus_shade_entry(results_window_menu, RESULTS_MENU_CLEAR_SELECTION, handle->selection_count == 0);
+	menus_shade_entry(results_window_menu, RESULTS_MENU_OBJECT_INFO, handle->selection_count != 1);
+	menus_shade_entry(results_window_menu, RESULTS_MENU_OPEN_PARENT, handle->selection_count != 1);
+	menus_shade_entry(results_window_menu, RESULTS_MENU_COPY_NAMES, handle->selection_count == 0);
+	menus_shade_entry(results_window_menu, RESULTS_MENU_MODIFY_SEARCH, dialogue_window_is_open() || file_get_dialogue(handle->file) == NULL);
+	menus_shade_entry(results_window_menu, RESULTS_MENU_ADD_TO_HOTLIST, hotlist_add_window_is_open() || file_get_dialogue(handle->file) == NULL);
+	menus_shade_entry(results_window_menu, RESULTS_MENU_STOP_SEARCH, !file_search_active(handle->file));
+
+	menus_tick_entry(results_window_menu_display, RESULTS_MENU_DISPLAY_PATH_ONLY, !handle->full_info);
+	menus_tick_entry(results_window_menu_display, RESULTS_MENU_DISPLAY_FULL_INFO, handle->full_info);
+
+	saveas_initialise_dialogue(results_save_results, NULL, "FileName", NULL, TRUE, FALSE, handle);
+	saveas_initialise_dialogue(results_save_paths, NULL, "ExptName", "SelectName", handle->selection_count > 0, handle->selection_count > 0, handle);
+	saveas_initialise_dialogue(results_save_options, NULL, "SrchName", NULL, FALSE, FALSE, handle);*/
+}
+
+
+/**
+ * Process submenu warning events for the list window menu.
+ *
+ * \param w		The handle of the owning window.
+ * \param *menu		The menu handle.
+ * \param *warning	The submenu warning message data.
+ */
+
+static void list_menu_warning(wimp_w w, wimp_menu *menu, wimp_message_menu_warning *warning)
+{
+/*	switch (warning->selection.items[0]) {
+	case RESULTS_MENU_SAVE:
+		switch (warning->selection.items[1]) {
+		case RESULTS_MENU_SAVE_RESULTS:
+			saveas_prepare_dialogue(results_save_results);
+			wimp_create_sub_menu(warning->sub_menu, warning->pos.x, warning->pos.y);
+			break;
+		case RESULTS_MENU_SAVE_PATH_NAMES:
+			saveas_prepare_dialogue(results_save_paths);
+			wimp_create_sub_menu(warning->sub_menu, warning->pos.x, warning->pos.y);
+			break;
+		case RESULTS_MENU_SAVE_SEARCH_OPTIONS:
+			saveas_prepare_dialogue(results_save_options);
+			wimp_create_sub_menu(warning->sub_menu, warning->pos.x, warning->pos.y);
+			break;
+		}
+		break;
+
+	case RESULTS_MENU_OBJECT_INFO:
+		results_object_info_prepare(handle);
+		wimp_create_sub_menu(warning->sub_menu, warning->pos.x, warning->pos.y);
+		break;
+	} */
+}
+
+
+/**
+ * Handle selections from the list window menu.
+ *
+ * \param  w			The window to which the menu belongs.
+ * \param  *menu		Pointer to the menu itself.
+ * \param  *selection		Pointer to the Wimp menu selction block.
+ */
+
+static void list_menu_selection(wimp_w w, wimp_menu *menu, wimp_selection *selection)
+{
+	wimp_pointer		pointer;
+
+
+	wimp_get_pointer_info(&pointer);
+
+	switch(selection->items[0]) {
+//	case RESULTS_MENU_DISPLAY:
+//		switch(selection->items[1]) {
+//		case RESULTS_MENU_DISPLAY_PATH_ONLY:
+//			results_set_display_mode(handle, FALSE);
+//			break;
+
+//		case RESULTS_MENU_DISPLAY_FULL_INFO:
+//			results_set_display_mode(handle, TRUE);
+//			break;
+//		}
+//		break;
+
+	case LIST_MENU_SELECT_ALL:
+		list_select_all();
+		list_selection_from_menu = FALSE;
+		break;
+
+	case LIST_MENU_CLEAR_SELECTION:
+		list_select_none();
+		list_selection_from_menu = FALSE;
+		break;
+
+//	case RESULTS_MENU_OPEN_PARENT:
+//		if (handle->selection_count == 1)
+//			results_open_parent(handle, handle->selection_row);
+//		break;
+
+//	case RESULTS_MENU_COPY_NAMES:
+//		results_clipboard_copy_filenames(handle);
+//		break;
+
+//	case RESULTS_MENU_MODIFY_SEARCH:
+//		file_create_dialogue(&pointer, NULL, NULL, file_get_dialogue(handle->file));
+//		break;
+
+//	case RESULTS_MENU_ADD_TO_HOTLIST:
+//		hotlist_add_dialogue(file_get_dialogue(handle->file));
+//		break;
+
+//	case RESULTS_MENU_STOP_SEARCH:
+//		file_stop_search(handle->file);
+//		break;
+	}
+}
+
+
+/**
+ * Handle the closure of the list window menu.
+ *
+ * \param  w			The handle of the menu's parent window.
+ * \param  *menu		Pointer to the menu being closee.
+ */
+
+static void list_menu_close(wimp_w w, wimp_menu *menu)
+{
+	struct results_window	*handle = event_get_window_user_data(w);
+
+	if (list_selection_from_menu == FALSE)
+		return;
+
+	list_select_none();
+	list_selection_from_menu = FALSE;
+}
+
+
+
+
 
 
 /**
@@ -531,6 +726,7 @@ void list_rescan_paper_definitions(void)
 	list_index_count = 0;
 	list_selection_count = 0;
 	list_selection_row = -1;
+	list_selection_from_menu = FALSE;
 
 	paper = paper_get_definitions();
 
