@@ -48,6 +48,7 @@
 #include "sflib/event.h"
 #include "sflib/icons.h"
 #include "sflib/ihelp.h"
+#include "sflib/msgs.h"
 #include "sflib/templates.h"
 #include "sflib/windows.h"
 
@@ -212,22 +213,19 @@ void list_open_window(void)
 
 
 /**
- * Set the number of visible lines in the list window.
- *
- * \param lines			The number of lines to be displayed.
+ * Request the List window to rebuild its index from the paper definitions.
  */
 
-void list_set_lines(size_t lines)
+void list_rescan_paper_definitions(void)
 {
 	int			visible_extent, new_extent, new_scroll;
-	size_t			index_size;
+	size_t			paper_lines, index_size;
 	struct paper_size	*paper;
 	wimp_window_state	state;
 	os_box			extent;
 
-	debug_printf("Allocate space for %d lines", lines);
-
-	index_size = lines + 3;
+	paper_lines = paper_get_definition_count();
+	index_size = paper_lines + 3;
 
 	if (flex_extend((flex_ptr) &list_index, index_size * sizeof(struct list_redraw)) == 0)
 		list_index = NULL;
@@ -236,9 +234,9 @@ void list_set_lines(size_t lines)
 	paper = paper_get_definitions();
 
 	if (list_index != NULL) {
-		list_add_paper_source_to_index(PAPER_SOURCE_MASTER, index_size, paper, lines);
-		list_add_paper_source_to_index(PAPER_SOURCE_DEVICE, index_size, paper, lines);
-		list_add_paper_source_to_index(PAPER_SOURCE_USER, index_size, paper, lines);
+		list_add_paper_source_to_index(PAPER_SOURCE_MASTER, index_size, paper, paper_lines);
+		list_add_paper_source_to_index(PAPER_SOURCE_DEVICE, index_size, paper, paper_lines);
+		list_add_paper_source_to_index(PAPER_SOURCE_USER, index_size, paper, paper_lines);
 	}
 
 	state.w = list_window;
@@ -246,7 +244,7 @@ void list_set_lines(size_t lines)
 
 	visible_extent = state.yscroll + (state.visible.y0 - state.visible.y1);
 
-	new_extent = -((LIST_ICON_HEIGHT * lines) + LIST_TOOLBAR_HEIGHT);
+	new_extent = -((LIST_ICON_HEIGHT * index_size) + LIST_TOOLBAR_HEIGHT);
 
 	if (new_extent > (state.visible.y0 - state.visible.y1))
 		new_extent = state.visible.y0 - state.visible.y1;
@@ -276,6 +274,16 @@ void list_set_lines(size_t lines)
 	wimp_set_extent(list_window, &extent);
 }
 
+
+/**
+ * Add the paper definitions from a given source to the end of the paper
+ * list index.
+ * 
+ * \param source		The target paper source to be added to the index.
+ * \param index_lines		The number of index entries allocated for the process.
+ * \param *paper		The paper list to process.
+ * \param paper_lines		The number of paper definitions in the list.
+ */
 
 static void list_add_paper_source_to_index(enum paper_source source, size_t index_lines, struct paper_size *paper, size_t paper_lines)
 {
@@ -331,7 +339,6 @@ static void list_toolbar_click_handler(wimp_pointer *pointer)
 }
 
 
-
 /**
  * Callback to handle redraw events on the list window.
  *
@@ -341,16 +348,16 @@ static void list_toolbar_click_handler(wimp_pointer *pointer)
 static void list_redraw_handler(wimp_draw *redraw)
 {
 	struct paper_size	*paper;
-	int			lines, ox, oy, top, bottom, y, i;
+	int			ox, oy, top, bottom, y;
 	osbool			more;
 	wimp_icon		*icon;
 	char			buffer[LIST_ICON_BUFFER_LEN], validation[255], *unit_format, *token;
 	double			unit_scale;
 
-//	handle = (struct results_window *) event_get_window_user_data(redraw->w);
-
-//	if (handle == NULL)
-//		return;
+	/* ** This is a pointer to a flex block. If anything is done to make the
+	 * ** heap shift before the end of the redraw process, things will
+	 * ** go very badly wrong.
+	 */
 
 	paper = paper_get_definitions();
 

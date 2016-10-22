@@ -52,11 +52,9 @@ void list_open_window(void);
 
 
 /**
- * Set the number of visible lines in the list window.
- *
- * \param lines			The number of lines to be displayed.
+ * Request the List window to rebuild its index from the paper definitions.
  */
 
-void list_set_lines(size_t lines);
+void list_rescan_paper_definitions(void);
 
 #endif

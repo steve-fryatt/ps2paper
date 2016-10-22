@@ -101,37 +101,13 @@ void paper_initialise(void)
 
 static void paper_read_definitions(void)
 {
-//	struct paper_size	*paper;
-	int			i;
-
 	paper_clear_definitions();
 
 	paper_read_def_file("Printers:PaperRO", PAPER_SOURCE_MASTER);
 	paper_read_def_file("PrinterChoices:PaperRW", PAPER_SOURCE_USER);
 	paper_read_def_file("Printers:ps.Resources.PaperRO", PAPER_SOURCE_DEVICE);
 
-//	redraw_list = malloc(paper_count * sizeof(struct paper_size *));
-//	if (redraw_list == NULL) {
-//		error_msgs_report_error("PaperNoMem");
-//		paper_clear_definitions();
-//		return;
-//	}
-
-//	paper = paper_sizes;
-//	i = paper_count;
-
-//	while (i > 0 && paper != NULL) {
-//		redraw_list[--i] = paper;
-//		paper = paper->next;
-//	}
-
-	/* Set the window extent. */
-
-	list_set_lines(paper_count);
-
-	for (i = 0; i < paper_count; i++) {
-		debug_printf("Found paper: %s", paper_sizes[i].name);
-	}
+	list_rescan_paper_definitions();
 }
 
 
