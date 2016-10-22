@@ -114,9 +114,19 @@ static enum list_units		list_display_units;		/**< The units used to display pape
 static struct list_redraw	*list_index = NULL;		/**< The window redraw index.			*/
 static size_t			list_index_count = 0;		/**< The number of entries in the redraw index.	*/
 
+static int			list_selection_count = 0;	/**< The number of selected lines.		*/
+static int			list_selection_row = -1;	/**< The currently selected row, or -1.		*/
+
+static void list_click_handler(wimp_pointer *pointer);
+static void list_toolbar_click_handler(wimp_pointer *pointer);
 static void list_redraw_handler(wimp_draw *redraw);
 static void list_add_paper_source_to_index(enum paper_source source, size_t index_lines, struct paper_size *paper, size_t paper_lines);
-static void list_toolbar_click_handler(wimp_pointer *pointer);
+static int list_calculate_window_click_row(os_coord *pos, wimp_window_state *state);
+static void list_select_click_select(int row);
+static void list_select_click_adjust(unsigned row);
+static void list_select_all(void);
+static void list_select_none(void);
+
 
 /* Line position calculations.
  *
@@ -179,6 +189,7 @@ void list_initialise(osspriteop_area *sprites)
 	ihelp_add_window(list_pane, "ListTB", NULL);
 
 	event_add_window_redraw_event(list_window, list_redraw_handler);
+	event_add_window_mouse_event(list_window, list_click_handler);
 
 	event_add_window_mouse_event(list_pane, list_toolbar_click_handler);
 //	event_add_window_key_event(preset_edit_window, preset_edit_keypress_handler);
@@ -213,98 +224,33 @@ void list_open_window(void)
 
 
 /**
- * Request the List window to rebuild its index from the paper definitions.
+ * Process mouse clicks in the list window.
+ *
+ * \param *pointer		The mouse event block to handle.
  */
 
-void list_rescan_paper_definitions(void)
+static void list_click_handler(wimp_pointer *pointer)
 {
-	int			visible_extent, new_extent, new_scroll;
-	size_t			paper_lines, index_size;
-	struct paper_size	*paper;
 	wimp_window_state	state;
-	os_box			extent;
-
-	paper_lines = paper_get_definition_count();
-	index_size = paper_lines + 3;
-
-	if (flex_extend((flex_ptr) &list_index, index_size * sizeof(struct list_redraw)) == 0)
-		list_index = NULL;
-	list_index_count = 0;
-
-	paper = paper_get_definitions();
-
-	if (list_index != NULL) {
-		list_add_paper_source_to_index(PAPER_SOURCE_MASTER, index_size, paper, paper_lines);
-		list_add_paper_source_to_index(PAPER_SOURCE_DEVICE, index_size, paper, paper_lines);
-		list_add_paper_source_to_index(PAPER_SOURCE_USER, index_size, paper, paper_lines);
-	}
-
-	state.w = list_window;
-	wimp_get_window_state(&state);
-
-	visible_extent = state.yscroll + (state.visible.y0 - state.visible.y1);
-
-	new_extent = -((LIST_ICON_HEIGHT * index_size) + LIST_TOOLBAR_HEIGHT);
-
-	if (new_extent > (state.visible.y0 - state.visible.y1))
-		new_extent = state.visible.y0 - state.visible.y1;
-
-	if (new_extent > visible_extent) {
-		/* Calculate the required new scroll offset.  If this is greater than zero, the current window is too
-		 * big and will need shrinking down.  Otherwise, just set the new scroll offset.
-		 */
-
-		new_scroll = new_extent - (state.visible.y0 - state.visible.y1);
-
-		if (new_scroll > 0) {
-			state.visible.y0 += new_scroll;
-			state.yscroll = 0;
-		} else {
-			state.yscroll = new_scroll;
-		}
-
-		wimp_open_window((wimp_open *) &state);
-	}
-
-	extent.x0 = 0;
-	extent.y1 = 0;
-	extent.x1 = state.visible.x1 - state.visible.x0;
-	extent.y0 = new_extent;
-
-	wimp_set_extent(list_window, &extent);
-}
+	int			row;
 
 
-/**
- * Add the paper definitions from a given source to the end of the paper
- * list index.
- * 
- * \param source		The target paper source to be added to the index.
- * \param index_lines		The number of index entries allocated for the process.
- * \param *paper		The paper list to process.
- * \param paper_lines		The number of paper definitions in the list.
- */
-
-static void list_add_paper_source_to_index(enum paper_source source, size_t index_lines, struct paper_size *paper, size_t paper_lines)
-{
-	int i;
-
-	if (list_index_count >= index_lines)
+	state.w = pointer->w;
+	if (xwimp_get_window_state(&state) != NULL)
 		return;
 
-	list_index[list_index_count].type = LIST_LINE_TYPE_SEPARATOR;
-	list_index[list_index_count].source = source;
-	list_index[list_index_count].flags = LIST_LINE_FLAGS_NONE;
+	row = list_calculate_window_click_row(&(pointer->pos), &state);
 
-	list_index_count++;
+	debug_printf("Click in row %d", row);
 
-	for (i = 0; i < paper_lines && list_index_count < index_lines; i++) {
-		if (paper[i].source == source) {
-			list_index[list_index_count].type = LIST_LINE_TYPE_PAPER;
-			list_index[list_index_count].index = i;
-			list_index[list_index_count].flags = LIST_LINE_FLAGS_NONE;
-			list_index_count++;
-		}
+	switch(pointer->buttons) {
+	case wimp_CLICK_SELECT:
+		list_select_click_select(row);
+		break;
+
+	case wimp_CLICK_ADJUST:
+		list_select_click_adjust(row);
+		break;
 	}
 }
 
@@ -550,4 +496,285 @@ static void list_redraw_handler(wimp_draw *redraw)
 
 		more = wimp_get_rectangle(redraw);
 	}
+}
+
+
+/**
+ * Request the List window to rebuild its index from the paper definitions.
+ */
+
+void list_rescan_paper_definitions(void)
+{
+	int			visible_extent, new_extent, new_scroll;
+	size_t			paper_lines, index_size;
+	struct paper_size	*paper;
+	wimp_window_state	state;
+	os_box			extent;
+
+	paper_lines = paper_get_definition_count();
+	index_size = paper_lines + 3;
+
+	if (flex_extend((flex_ptr) &list_index, index_size * sizeof(struct list_redraw)) == 0)
+		list_index = NULL;
+
+	list_index_count = 0;
+	list_selection_count = 0;
+	list_selection_row = -1;
+
+	paper = paper_get_definitions();
+
+	if (list_index != NULL) {
+		list_add_paper_source_to_index(PAPER_SOURCE_MASTER, index_size, paper, paper_lines);
+		list_add_paper_source_to_index(PAPER_SOURCE_DEVICE, index_size, paper, paper_lines);
+		list_add_paper_source_to_index(PAPER_SOURCE_USER, index_size, paper, paper_lines);
+	}
+
+	state.w = list_window;
+	wimp_get_window_state(&state);
+
+	visible_extent = state.yscroll + (state.visible.y0 - state.visible.y1);
+
+	new_extent = -((LIST_ICON_HEIGHT * index_size) + LIST_TOOLBAR_HEIGHT);
+
+	if (new_extent > (state.visible.y0 - state.visible.y1))
+		new_extent = state.visible.y0 - state.visible.y1;
+
+	if (new_extent > visible_extent) {
+		/* Calculate the required new scroll offset.  If this is greater than zero, the current window is too
+		 * big and will need shrinking down.  Otherwise, just set the new scroll offset.
+		 */
+
+		new_scroll = new_extent - (state.visible.y0 - state.visible.y1);
+
+		if (new_scroll > 0) {
+			state.visible.y0 += new_scroll;
+			state.yscroll = 0;
+		} else {
+			state.yscroll = new_scroll;
+		}
+
+		wimp_open_window((wimp_open *) &state);
+	}
+
+	extent.x0 = 0;
+	extent.y1 = 0;
+	extent.x1 = state.visible.x1 - state.visible.x0;
+	extent.y0 = new_extent;
+
+	wimp_set_extent(list_window, &extent);
+}
+
+
+/**
+ * Add the paper definitions from a given source to the end of the paper
+ * list index.
+ * 
+ * \param source		The target paper source to be added to the index.
+ * \param index_lines		The number of index entries allocated for the process.
+ * \param *paper		The paper list to process.
+ * \param paper_lines		The number of paper definitions in the list.
+ */
+
+static void list_add_paper_source_to_index(enum paper_source source, size_t index_lines, struct paper_size *paper, size_t paper_lines)
+{
+	int i;
+
+	if (list_index_count >= index_lines)
+		return;
+
+	list_index[list_index_count].type = LIST_LINE_TYPE_SEPARATOR;
+	list_index[list_index_count].source = source;
+	list_index[list_index_count].flags = LIST_LINE_FLAGS_NONE;
+
+	list_index_count++;
+
+	for (i = 0; i < paper_lines && list_index_count < index_lines; i++) {
+		if (paper[i].source == source) {
+			list_index[list_index_count].type = LIST_LINE_TYPE_PAPER;
+			list_index[list_index_count].index = i;
+			list_index[list_index_count].flags = LIST_LINE_FLAGS_NONE;
+			list_index_count++;
+		}
+	}
+}
+
+
+/**
+ * Calculate the row that the mouse was clicked over in the list window.
+ *
+ * \param  *pointer		The Wimp pointer data.
+ * \param  *state		The results window state.
+ * \return			The row (from 0) or -1 if none.
+ */
+
+static int list_calculate_window_click_row(os_coord *pos, wimp_window_state *state)
+{
+	int		y, row_y_pos, row;
+
+	y = pos->y - state->visible.y1 + state->yscroll;
+
+	row = ROW(y);
+	row_y_pos = ROW_Y_POS(y);
+
+	if (row >= list_index_count || ROW_ABOVE(row_y_pos) || ROW_BELOW(row_y_pos))
+		row = -1;
+
+	return row;
+}
+
+
+/**
+ * Update the current selection based on a select click over a row of the
+ * window.
+ *
+ * \param row			The row under the click, or -1.
+ */
+
+static void list_select_click_select(int row)
+{
+	wimp_window_state	window;
+
+	/* If the click is on a selection, nothing changes. */
+
+	if ((row != -1) && (row < list_index_count) && (list_index[row].flags & LIST_LINE_FLAGS_SELECTED))
+		return;
+
+	/* Clear everything and then try to select the clicked line. */
+
+	list_select_none();
+
+	window.w = list_window;
+	if (xwimp_get_window_state(&window) != NULL)
+		return;
+
+	if ((row != -1) && (row < list_index_count) && (list_index[row].type == LIST_LINE_TYPE_PAPER)) {
+		list_index[row].flags |= LIST_LINE_FLAGS_SELECTED;
+		list_selection_count++;
+		if (list_selection_count == 1)
+			list_selection_row = row;
+
+		wimp_force_redraw(window.w, window.xscroll, LINE_BASE(row),
+				window.xscroll + (window.visible.x1 - window.visible.x0), LINE_Y1(row));
+	}
+}
+
+
+/**
+ * Update the current selection based on an adjust click over a row of the
+ * window.
+ *
+ * \param row			The row under the click, or RESULTS_ROW_NONE.
+ */
+
+static void list_select_click_adjust(unsigned row)
+{
+	int			i;
+	wimp_window_state	window;
+
+	if ((row == -1) || (row >= list_index_count) || (list_index[row].type != LIST_LINE_TYPE_PAPER))
+		return;
+
+	window.w = list_window;
+	if (xwimp_get_window_state(&window) != NULL)
+		return;
+
+	if (list_index[row].flags & LIST_LINE_FLAGS_SELECTED) {
+		list_index[row].flags &= ~LIST_LINE_FLAGS_SELECTED;
+		list_selection_count--;
+		if (list_selection_count == 1) {
+			for (i = 0; i < list_index_count; i++) {
+				if (list_index[row].flags & LIST_LINE_FLAGS_SELECTED) {
+					list_selection_row = i;
+					break;
+				}
+			}
+		}
+	} else {
+		list_index[row].flags |= LIST_LINE_FLAGS_SELECTED;
+		list_selection_count++;
+		if (list_selection_count == 1)
+			list_selection_row = row;
+	}
+
+	wimp_force_redraw(window.w, window.xscroll, LINE_BASE(row),
+			window.xscroll + (window.visible.x1 - window.visible.x0), LINE_Y1(row));
+}
+
+
+/**
+ * Select all of the rows in the list window.
+ */
+
+static void list_select_all(void)
+{
+	int			i;
+	wimp_window_state	window;
+
+	if (list_selection_count == list_index_count)
+		return;
+
+	window.w = list_window;
+	if (xwimp_get_window_state(&window) != NULL)
+		return;
+
+	for (i = 0; i < list_index_count; i++) {
+		if (!(list_index[i].flags & LIST_LINE_FLAGS_SELECTED)) {
+			list_index[i].flags |= LIST_LINE_FLAGS_SELECTED;
+
+			list_selection_count++;
+			if (list_selection_count == 1)
+				list_selection_row = i;
+
+			wimp_force_redraw(window.w, window.xscroll, LINE_BASE(i),
+					window.xscroll + (window.visible.x1 - window.visible.x0), LINE_Y1(i));
+		}
+	}
+}
+
+
+/**
+ * Clear the selection in the list window.
+ */
+
+static void list_select_none(void)
+{
+	int			i;
+	wimp_window_state	window;
+
+	if (list_selection_count == 0)
+		return;
+
+	window.w = list_window;
+	if (xwimp_get_window_state(&window) != NULL)
+		return;
+
+	/* If there's just one row selected, we can avoid looping through the lot
+	 * by just clearing that one line.
+	 */
+
+	if (list_selection_count == 1) {
+		if (list_selection_row < list_index_count)
+			list_index[list_selection_row].flags &= ~LIST_LINE_FLAGS_SELECTED;
+		list_selection_count = 0;
+
+		wimp_force_redraw(window.w, window.xscroll, LINE_BASE(list_selection_row),
+				window.xscroll + (window.visible.x1 - window.visible.x0), LINE_Y1(list_selection_row));
+
+		return;
+	}
+
+	/* If there is more than one row selected, we must loop through the lot
+	 * to clear them all.
+	 */
+
+	for (i = 0; i < list_index_count; i++) {
+		if (list_index[i].flags & LIST_LINE_FLAGS_SELECTED) {
+			list_index[i].flags &= ~LIST_LINE_FLAGS_SELECTED;
+
+			wimp_force_redraw(window.w, window.xscroll, LINE_BASE(i),
+					window.xscroll + (window.visible.x1 - window.visible.x0), LINE_Y1(i));
+		}
+	}
+
+	list_selection_count = 0;
 }
