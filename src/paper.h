@@ -47,6 +47,7 @@
  */
 
 enum paper_source {
+	PAPER_SOURCE_NONE,					/**< There's no definition source.				*/
 	PAPER_SOURCE_MASTER,					/**< The definition is in the Printers' master definitions.	*/
 	PAPER_SOURCE_DEVICE,					/**< The definition is in the Printers' device definitions.	*/
 	PAPER_SOURCE_USER					/**< The definition is in the User definitions.			*/
