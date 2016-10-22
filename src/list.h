@@ -57,6 +57,6 @@ void list_open_window(void);
  * \param lines			The number of lines to be displayed.
  */
 
-void list_set_lines(int lines);
+void list_set_lines(size_t lines);
 
 #endif

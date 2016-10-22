@@ -67,8 +67,8 @@
 #define PAPER_STORAGE_ALLOCATION 4
 
 static struct paper_size	*paper_sizes = NULL;		/**< Linked list of paper sizes.				*/
-static unsigned			paper_allocation = 0;		/**< The number of spaces allocated for paper definitions.	*/
-static unsigned			paper_count = 0;		/**< Number of defined paper sizes.				*/
+static size_t			paper_allocation = 0;		/**< The number of spaces allocated for paper definitions.	*/
+static size_t			paper_count = 0;		/**< Number of defined paper sizes.				*/
 
 static void			paper_read_definitions(void);
 static void			paper_clear_definitions(void);
@@ -135,7 +135,7 @@ static void paper_read_definitions(void)
 }
 
 
-int paper_get_definition_count(void)
+size_t paper_get_definition_count(void)
 {
 	return paper_count;
 }

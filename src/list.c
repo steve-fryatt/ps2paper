@@ -90,8 +90,14 @@ enum list_line_type {
 	LIST_LINE_TYPE_PAPER
 };
 
+enum list_line_flags {
+	LIST_LINE_FLAGS_NONE = 0,
+	LIST_LINE_FLAGS_SELECTED = 1
+};
+
 struct list_redraw {
 	enum list_line_type	type;
+	enum list_line_flags	flags;
 	int			index;
 	enum paper_source	source;
 };
@@ -104,9 +110,11 @@ static wimp_w			list_pane = NULL;		/**< The list pane handle.			*/
 
 static enum list_units		list_display_units;		/**< The units used to display paper sizes.	*/
 
-static struct list_redraw	*list_index = NULL;			/**< The window redraw index.			*/	
+static struct list_redraw	*list_index = NULL;		/**< The window redraw index.			*/
+static size_t			list_index_count = 0;		/**< The number of entries in the redraw index.	*/
 
 static void list_redraw_handler(wimp_draw *redraw);
+static void list_add_paper_source_to_index(enum paper_source source, size_t index_lines, struct paper_size *paper, size_t paper_lines);
 static void list_toolbar_click_handler(wimp_pointer *pointer);
 
 /* Line position calculations.
@@ -208,62 +216,28 @@ void list_open_window(void)
  * \param lines			The number of lines to be displayed.
  */
 
-void list_set_lines(int lines)
+void list_set_lines(size_t lines)
 {
-	int			i, j, visible_extent, new_extent, new_scroll;
+	int			visible_extent, new_extent, new_scroll;
+	size_t			index_size;
 	struct paper_size	*paper;
 	wimp_window_state	state;
 	os_box			extent;
 
 	debug_printf("Allocate space for %d lines", lines);
 
-	if (flex_extend((flex_ptr) &list_index, (lines + 3) * sizeof(struct list_redraw)) == 0)
+	index_size = lines + 3;
+
+	if (flex_extend((flex_ptr) &list_index, index_size * sizeof(struct list_redraw)) == 0)
 		list_index = NULL;
+	list_index_count = 0;
 
 	paper = paper_get_definitions();
 
 	if (list_index != NULL) {
-		i = 0;
-
-		list_index[i].type = LIST_LINE_TYPE_SEPARATOR;
-		list_index[i].source = PAPER_SOURCE_MASTER;
-
-		i++;
-
-		for (j = 0; j < lines; j++) {
-			if (paper[j].source == PAPER_SOURCE_MASTER) {
-				list_index[i].type = LIST_LINE_TYPE_PAPER;
-				list_index[i].index = j;
-				i++;
-			}
-		}
-
-		list_index[i].type = LIST_LINE_TYPE_SEPARATOR;
-		list_index[i].source = PAPER_SOURCE_DEVICE;
-
-		i++;
-
-		for (j = 0; j < lines; j++) {
-			if (paper[j].source == PAPER_SOURCE_DEVICE) {
-				list_index[i].type = LIST_LINE_TYPE_PAPER;
-				list_index[i].index = j;
-				i++;
-			}
-		}
-
-		list_index[i].type = LIST_LINE_TYPE_SEPARATOR;
-		list_index[i].source = PAPER_SOURCE_USER;
-
-		i++;
-
-		for (j = 0; j < lines; j++) {
-			if (paper[j].source == PAPER_SOURCE_USER) {
-				list_index[i].type = LIST_LINE_TYPE_PAPER;
-				list_index[i].index = j;
-				i++;
-			}
-		}
-
+		list_add_paper_source_to_index(PAPER_SOURCE_MASTER, index_size, paper, lines);
+		list_add_paper_source_to_index(PAPER_SOURCE_DEVICE, index_size, paper, lines);
+		list_add_paper_source_to_index(PAPER_SOURCE_USER, index_size, paper, lines);
 	}
 
 	state.w = list_window;
@@ -302,7 +276,28 @@ void list_set_lines(int lines)
 }
 
 
+static void list_add_paper_source_to_index(enum paper_source source, size_t index_lines, struct paper_size *paper, size_t paper_lines)
+{
+	int i;
 
+	if (list_index_count >= index_lines)
+		return;
+
+	list_index[list_index_count].type = LIST_LINE_TYPE_SEPARATOR;
+	list_index[list_index_count].source = source;
+	list_index[list_index_count].flags = LIST_LINE_FLAGS_NONE;
+
+	list_index_count++;
+
+	for (i = 0; i < paper_lines && list_index_count < index_lines; i++) {
+		if (paper[i].source == source) {
+			list_index[list_index_count].type = LIST_LINE_TYPE_PAPER;
+			list_index[list_index_count].index = i;
+			list_index[list_index_count].flags = LIST_LINE_FLAGS_NONE;
+			list_index_count++;
+		}
+	}
+}
 
 
 /**
@@ -356,7 +351,6 @@ static void list_redraw_handler(wimp_draw *redraw)
 //	if (handle == NULL)
 //		return;
 
-	lines = paper_get_definition_count() + 3;
 	paper = paper_get_definitions();
 
 	icon = list_window_def->icons;
@@ -412,8 +406,8 @@ static void list_redraw_handler(wimp_draw *redraw)
 			top = 0;
 
 		bottom = ((LIST_LINE_HEIGHT * 1.5) + oy - redraw->clip.y0 - LIST_TOOLBAR_HEIGHT) / LIST_LINE_HEIGHT;
-		if (bottom > lines)
-			bottom = lines;
+		if (bottom > list_index_count)
+			bottom = list_index_count;
 
 		for (y = top; y < bottom; y++) {
 			switch (list_index[y].type) {

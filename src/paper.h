@@ -80,7 +80,7 @@ struct paper_size {
 
 void paper_initialise(void);
 
-int paper_get_definition_count(void);
+size_t paper_get_definition_count(void);
 
 struct paper_size *paper_get_definitions(void);
 
