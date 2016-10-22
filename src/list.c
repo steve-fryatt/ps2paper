@@ -76,9 +76,14 @@
 #define LIST_UNKNOWN2_ICON 7
 #define LIST_SEPARATOR_ICON 8
 
-#define LIST_INCH_ICON 14
-#define LIST_MM_ICON 15
-#define LIST_POINT_ICON 16
+#define LIST_REFRESH_ICON 0
+#define LIST_SELECT_ICON 1
+
+#define LIST_NAME_HEADING_ICON 2
+
+#define LIST_INCH_ICON 9
+#define LIST_MM_ICON 10
+#define LIST_POINT_ICON 11
 
 enum list_units {
 	LIST_UNITS_MM = 0,
@@ -200,8 +205,8 @@ void list_initialise(osspriteop_area *sprites)
 	icons_set_radio_group_selected(list_pane, list_display_units, 3, LIST_MM_ICON, LIST_INCH_ICON, LIST_POINT_ICON);
 
 	for (icon = 0; icon <= LIST_STATUS_ICON; icon++) {
-		list_window_def->icons[icon].extent.x0 = list_pane_def->icons[icon + 7].extent.x0 + (LIST_LINE_OFFSET / 2);
-		list_window_def->icons[icon].extent.x1 = list_pane_def->icons[icon + 7].extent.x1 - (LIST_LINE_OFFSET / 2);
+		list_window_def->icons[icon].extent.x0 = list_pane_def->icons[icon + LIST_NAME_HEADING_ICON].extent.x0 + (LIST_LINE_OFFSET / 2);
+		list_window_def->icons[icon].extent.x1 = list_pane_def->icons[icon + LIST_NAME_HEADING_ICON].extent.x1 - (LIST_LINE_OFFSET / 2);
 	}
 
 	list_window_def->icons[LIST_SEPARATOR_ICON].extent.x0 = list_window_def->icons[LIST_NAME_ICON].extent.x0 - (LIST_LINE_OFFSET / 2);
@@ -267,6 +272,12 @@ static void list_toolbar_click_handler(wimp_pointer *pointer)
 		return;
 
 	switch ((int) pointer->i) {
+	case LIST_SELECT_ICON:
+		if (pointer->buttons == wimp_CLICK_SELECT)
+			list_select_all();
+		else if (pointer->buttons == wimp_CLICK_ADJUST)
+			list_select_none();
+		break;
 	case LIST_MM_ICON:
 		list_display_units = LIST_UNITS_MM;
 		windows_redraw(list_window);
