@@ -413,6 +413,8 @@ static void list_redraw_handler(wimp_draw *redraw)
 		for (y = top; y < bottom; y++) {
 			switch (list_index[y].type) {
 			case LIST_LINE_TYPE_SEPARATOR:
+				/* Plot the separator icon. */
+
 				icon[LIST_SEPARATOR_ICON].extent.y0 = LINE_Y0(y);
 				icon[LIST_SEPARATOR_ICON].extent.y1 = LINE_Y1(y);
 
@@ -438,6 +440,8 @@ static void list_redraw_handler(wimp_draw *redraw)
 				break;
 			
 			case LIST_LINE_TYPE_PAPER:
+				/* Plot the Paper Name icon. */
+
 				icon[LIST_NAME_ICON].extent.y0 = LINE_Y0(y);
 				icon[LIST_NAME_ICON].extent.y1 = LINE_Y1(y);
 				icon[LIST_NAME_ICON].data.indirected_text_and_sprite.text = paper[list_index[y].index].name;
@@ -446,8 +450,10 @@ static void list_redraw_handler(wimp_draw *redraw)
 					icon[LIST_NAME_ICON].flags |= wimp_ICON_SELECTED;
 				else
 					icon[LIST_NAME_ICON].flags &= ~wimp_ICON_SELECTED;
+
 				wimp_plot_icon(&(icon[LIST_NAME_ICON]));
 
+				/* Plot the Width icon. */
 
 				icon[LIST_WIDTH_ICON].extent.y0 = LINE_Y0(y);
 				icon[LIST_WIDTH_ICON].extent.y1 = LINE_Y1(y);
@@ -457,6 +463,8 @@ static void list_redraw_handler(wimp_draw *redraw)
 
 				wimp_plot_icon(&(icon[LIST_WIDTH_ICON]));
 
+				/* Plot the height icon. */
+
 				icon[LIST_HEIGHT_ICON].extent.y0 = LINE_Y0(y);
 				icon[LIST_HEIGHT_ICON].extent.y1 = LINE_Y1(y);
 
@@ -464,6 +472,8 @@ static void list_redraw_handler(wimp_draw *redraw)
 				buffer[LIST_ICON_BUFFER_LEN - 1] = '\0';
 
 				wimp_plot_icon(&(icon[LIST_HEIGHT_ICON]));
+
+				/* Plot the Location icon. */
 
 				icon[LIST_LOCATION_ICON].extent.y0 = LINE_Y0(y);
 				icon[LIST_LOCATION_ICON].extent.y1 = LINE_Y1(y);
@@ -488,12 +498,16 @@ static void list_redraw_handler(wimp_draw *redraw)
 
 				wimp_plot_icon(&(icon[LIST_LOCATION_ICON]));
 
+				/* Plot the PS filename icon. */
+
 				icon[LIST_FILENAME_ICON].extent.y0 = LINE_Y0(y);
 				icon[LIST_FILENAME_ICON].extent.y1 = LINE_Y1(y);
 				icon[LIST_FILENAME_ICON].data.indirected_text_and_sprite.text = paper[list_index[y].index].ps2_file;
 				icon[LIST_FILENAME_ICON].data.indirected_text_and_sprite.size = PAPER_FILE_LEN;
 
 				wimp_plot_icon(&(icon[LIST_FILENAME_ICON]));
+
+				/* Plot the PS file status icon. */
 
 				icon[LIST_STATUS_ICON].extent.y0 = LINE_Y0(y);
 				icon[LIST_STATUS_ICON].extent.y1 = LINE_Y1(y);
@@ -525,198 +539,6 @@ static void list_redraw_handler(wimp_draw *redraw)
 			default:
 				break;
 			}
-			
-
-
-	//		i = handle->redraw[y].index;
-
-	//		if (handle->redraw[i].format_width != handle->format_width)
-	//			results_reformat_line(handle, i, truncation, truncation_len);
-
-	/*		switch (handle->redraw[i].type) {
-			case RESULTS_LINE_FILENAME:
-			case RESULTS_LINE_ERROR_FILENAME:
-				icon[RESULTS_ICON_FILE].extent.y0 = LINE_Y0(y);
-				icon[RESULTS_ICON_FILE].extent.y1 = LINE_Y1(y);
-
-				objdb_get_info(handle->objects, handle->redraw[i].file, file, &object);
-				fileicon_get_object_icon(file, &typeinfo);
-
-				if (typeinfo.small != TEXTDUMP_NULL) {
-					strcpy(validation + 1, fileicon_get_base() + typeinfo.small);
-					icon[RESULTS_ICON_FILE].flags &= ~wimp_ICON_HALF_SIZE;
-				} else if (typeinfo.large != TEXTDUMP_NULL) {
-					strcpy(validation + 1, fileicon_get_base() + typeinfo.large);
-					icon[RESULTS_ICON_FILE].flags |= wimp_ICON_HALF_SIZE;
-				} else {
-					strcpy(validation + 1, "small_xxx");
-					icon[RESULTS_ICON_FILE].flags &= ~wimp_ICON_HALF_SIZE;
-				}
-
-				if ((object.status == OBJDB_STATUS_UNCHANGED || object.status == OBJDB_STATUS_CHANGED) &&
-						handle->redraw[i].type != RESULTS_LINE_ERROR_FILENAME)
-					icon[RESULTS_ICON_FILE].flags &= ~wimp_ICON_SHADED;
-				else
-					icon[RESULTS_ICON_FILE].flags |= wimp_ICON_SHADED;
-
-				if (truncation != NULL)
-					objdb_get_name(handle->objects, handle->redraw[i].file, truncation + 3, truncation_len - 3);
-
-				if (truncation == NULL) {
-					icon[RESULTS_ICON_FILE].data.indirected_text.text = "Redraw Error";
-				} else if (handle->redraw[i].truncate > 0) {
-					truncation[handle->redraw[i].truncate] = '.';
-					truncation[handle->redraw[i].truncate + 1] = '.';
-					truncation[handle->redraw[i].truncate + 2] = '.';
-					icon[RESULTS_ICON_FILE].data.indirected_text.text = truncation + handle->redraw[i].truncate;
-				} else {
-					icon[RESULTS_ICON_FILE].data.indirected_text.text = truncation + 3;
-				}
-
-				icon[RESULTS_ICON_FILE].flags &= ~wimp_ICON_FG_COLOUR;
-				icon[RESULTS_ICON_FILE].flags |= (handle->redraw[i].colour << wimp_ICON_FG_COLOUR_SHIFT);
-
-				if (handle->redraw[i].flags & RESULTS_FLAG_SELECTED)
-					icon[RESULTS_ICON_FILE].flags |= wimp_ICON_SELECTED;
-				else
-					icon[RESULTS_ICON_FILE].flags &= ~wimp_ICON_SELECTED;
-
-				wimp_plot_icon(&(icon[RESULTS_ICON_FILE]));
-				break;
-
-
-			case RESULTS_LINE_FILEINFO:
-				icon[RESULTS_ICON_TYPE].extent.y0 = LINE_Y0(y);
-				icon[RESULTS_ICON_TYPE].extent.y1 = LINE_Y1(y);
-
-				objdb_get_info(handle->objects, handle->redraw[i].file, file, &object);
-				fileicon_get_object_icon(file, &typeinfo);
-
-				if (typeinfo.name != TEXTDUMP_NULL) {
-					icon[RESULTS_ICON_TYPE].data.indirected_text.text = fileicon_get_base() + typeinfo.name;
-				} else {
-					icon[RESULTS_ICON_TYPE].data.indirected_text.text = "";
-				}
-
-				if (file == NULL)
-					break;
-
-				icon[RESULTS_ICON_SIZE].extent.y0 = LINE_Y0(y);
-				icon[RESULTS_ICON_SIZE].extent.y1 = LINE_Y1(y);
-				icon[RESULTS_ICON_ATTRIBUTES].extent.y0 = LINE_Y0(y);
-				icon[RESULTS_ICON_ATTRIBUTES].extent.y1 = LINE_Y1(y);
-				icon[RESULTS_ICON_DATE].extent.y0 = LINE_Y0(y);
-				icon[RESULTS_ICON_DATE].extent.y1 = LINE_Y1(y);
-
-				if (size != NULL && xos_convert_file_size(file->size, size, 32, NULL) != NULL)
-					*size = '\0';
-
-				if (attributes != NULL)
-					results_create_attributes_string(file->attr, attributes, 32);
-
-				if (date != NULL)
-					results_create_address_string(file->load_addr, file->exec_addr, date, 100);
-
-				icon[RESULTS_ICON_SIZE].data.indirected_text.text = (size != NULL) ? size : "Redraw Error";
-				icon[RESULTS_ICON_ATTRIBUTES].data.indirected_text.text = (attributes != NULL) ? attributes : "Redraw Error";
-				icon[RESULTS_ICON_DATE].data.indirected_text.text = (date != NULL) ? date : "Redraw Error";
-
-
-				if (object.status == OBJDB_STATUS_UNCHANGED) {
-					icon[RESULTS_ICON_SIZE].flags &= ~wimp_ICON_SHADED;
-					icon[RESULTS_ICON_TYPE].flags &= ~wimp_ICON_SHADED;
-					icon[RESULTS_ICON_ATTRIBUTES].flags &= ~wimp_ICON_SHADED;
-					icon[RESULTS_ICON_DATE].flags &= ~wimp_ICON_SHADED;
-				} else {
-					icon[RESULTS_ICON_SIZE].flags |= wimp_ICON_SHADED;
-					icon[RESULTS_ICON_TYPE].flags |= wimp_ICON_SHADED;
-					icon[RESULTS_ICON_ATTRIBUTES].flags |= wimp_ICON_SHADED;
-					icon[RESULTS_ICON_DATE].flags |= wimp_ICON_SHADED;
-				}
-
-				icon[RESULTS_ICON_SIZE].flags &= ~wimp_ICON_FG_COLOUR;
-				icon[RESULTS_ICON_SIZE].flags |= (handle->redraw[i].colour << wimp_ICON_FG_COLOUR_SHIFT);
-				icon[RESULTS_ICON_SIZE].flags &= ~wimp_ICON_SELECTED;
-
-				wimp_plot_icon(&(icon[RESULTS_ICON_SIZE]));
-				wimp_plot_icon(&(icon[RESULTS_ICON_TYPE]));
-				wimp_plot_icon(&(icon[RESULTS_ICON_ATTRIBUTES]));
-				wimp_plot_icon(&(icon[RESULTS_ICON_DATE]));
-				break;
-
-
-			case RESULTS_LINE_CONTENTS:
-				icon[RESULTS_ICON_SIZE].extent.y0 = LINE_Y0(y);
-				icon[RESULTS_ICON_SIZE].extent.y1 = LINE_Y1(y);
-
-	*/			/* We're about to copy a pointer to the icon text from the flex heap,
-				 * so take care not to shift the heap until wimp_plot_icon().
-				 */
-
-	/*			if (truncation != NULL && handle->redraw[i].truncate > 0) {
-					strcpy(truncation + 3, textdump_get_base(handle->text) + handle->redraw[i].text + handle->redraw[i].truncate);
-					icon[RESULTS_ICON_SIZE].data.indirected_text.text = truncation;
-				} else {
-					icon[RESULTS_ICON_SIZE].data.indirected_text.text = textdump_get_base(handle->text) + handle->redraw[i].text;
-				}
-				icon[RESULTS_ICON_SIZE].flags &= ~wimp_ICON_FG_COLOUR;
-				icon[RESULTS_ICON_SIZE].flags |= (handle->redraw[i].colour << wimp_ICON_FG_COLOUR_SHIFT);
-
-				if (handle->redraw[i].flags & RESULTS_FLAG_SELECTED)
-					icon[RESULTS_ICON_SIZE].flags |= wimp_ICON_SELECTED;
-				else
-					icon[RESULTS_ICON_SIZE].flags &= ~wimp_ICON_SELECTED;
-
-				icon[RESULTS_ICON_SIZE].flags &= ~wimp_ICON_SHADED;
-
-				wimp_plot_icon(&(icon[RESULTS_ICON_SIZE]));
-				break;
-
-
-			case RESULTS_LINE_TEXT:
-				icon[RESULTS_ICON_FILE].extent.y0 = LINE_Y0(y);
-				icon[RESULTS_ICON_FILE].extent.y1 = LINE_Y1(y);
-
-				fileicon_get_special_icon(handle->redraw[i].sprite, &typeinfo);
-
-				if (typeinfo.small != TEXTDUMP_NULL) {
-					strcpy(validation + 1, fileicon_get_base() + typeinfo.small);
-					icon[RESULTS_ICON_FILE].flags &= ~wimp_ICON_HALF_SIZE;
-				} else if (typeinfo.large != TEXTDUMP_NULL) {
-					strcpy(validation + 1, fileicon_get_base() + typeinfo.large);
-					icon[RESULTS_ICON_FILE].flags |= wimp_ICON_HALF_SIZE;
-				} else {
-					strcpy(validation + 1, "small_xxx");
-					icon[RESULTS_ICON_FILE].flags &= ~wimp_ICON_HALF_SIZE;
-				}
-
-	*/			/* We're about to copy a pointer to the icon text from the flex heap,
-				 * so take care not to shift the heap until wimp_plot_icon().
-				 */
-
-	/*			if (truncation != NULL && handle->redraw[i].truncate > 0) {
-					strcpy(truncation + 3, textdump_get_base(handle->text) + handle->redraw[i].text + handle->redraw[i].truncate);
-					icon[RESULTS_ICON_FILE].data.indirected_text.text = truncation;
-				} else {
-					icon[RESULTS_ICON_FILE].data.indirected_text.text = textdump_get_base(handle->text) + handle->redraw[i].text;
-				}
-				icon[RESULTS_ICON_FILE].flags &= ~wimp_ICON_FG_COLOUR;
-				icon[RESULTS_ICON_FILE].flags |= (handle->redraw[i].colour << wimp_ICON_FG_COLOUR_SHIFT);
-
-				if (handle->redraw[i].flags & RESULTS_FLAG_SELECTED)
-					icon[RESULTS_ICON_FILE].flags |= wimp_ICON_SELECTED;
-				else
-					icon[RESULTS_ICON_FILE].flags &= ~wimp_ICON_SELECTED;
-
-				icon[RESULTS_ICON_FILE].flags &= ~wimp_ICON_SHADED;
-
-				wimp_plot_icon(&(icon[RESULTS_ICON_FILE]));
-				break;
-
-			default:
-				break;
-			}
-	*/
 		}
 
 		more = wimp_get_rectangle(redraw);
