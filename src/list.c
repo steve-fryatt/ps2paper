@@ -155,6 +155,7 @@ void list_initialise(osspriteop_area *sprites)
 	list_window_def = templates_load_window("Paper");
 	list_pane_def = templates_load_window("PaperTB");
 
+	list_window_def->sprite_area = sprites;
 	list_pane_def->sprite_area = sprites;
 
 	list_display_units = LIST_UNITS_MM;
@@ -441,6 +442,10 @@ static void list_redraw_handler(wimp_draw *redraw)
 				icon[LIST_NAME_ICON].extent.y1 = LINE_Y1(y);
 				icon[LIST_NAME_ICON].data.indirected_text_and_sprite.text = paper[list_index[y].index].name;
 				icon[LIST_NAME_ICON].data.indirected_text_and_sprite.size = PAPER_NAME_LEN;
+				if (list_index[y].flags & LIST_LINE_FLAGS_SELECTED)
+					icon[LIST_NAME_ICON].flags |= wimp_ICON_SELECTED;
+				else
+					icon[LIST_NAME_ICON].flags &= ~wimp_ICON_SELECTED;
 				wimp_plot_icon(&(icon[LIST_NAME_ICON]));
 
 
