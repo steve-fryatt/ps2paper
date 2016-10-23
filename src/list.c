@@ -69,21 +69,20 @@
 #define LIST_NAME_ICON 0
 #define LIST_WIDTH_ICON 1
 #define LIST_HEIGHT_ICON 2
-#define LIST_LOCATION_ICON 3
-#define LIST_FILENAME_ICON 4
-#define LIST_STATUS_ICON 5
-#define LIST_UNKNOWN1_ICON 6
-#define LIST_UNKNOWN2_ICON 7
-#define LIST_SEPARATOR_ICON 8
+#define LIST_FILENAME_ICON 3
+#define LIST_STATUS_ICON 4
+#define LIST_UNKNOWN1_ICON 5
+#define LIST_UNKNOWN2_ICON 6
+#define LIST_SEPARATOR_ICON 7
 
 #define LIST_REFRESH_ICON 0
 #define LIST_SELECT_ICON 1
 
 #define LIST_NAME_HEADING_ICON 2
 
-#define LIST_INCH_ICON 9
-#define LIST_MM_ICON 10
-#define LIST_POINT_ICON 11
+#define LIST_INCH_ICON 8
+#define LIST_MM_ICON 9
+#define LIST_POINT_ICON 10
 
 #define LIST_MENU_SELECT_ALL 0
 #define LIST_MENU_CLEAR_SELECTION 1
@@ -544,9 +543,6 @@ static void list_redraw_handler(wimp_draw *redraw)
 	icon[LIST_HEIGHT_ICON].data.indirected_text_and_sprite.text = buffer;
 	icon[LIST_HEIGHT_ICON].data.indirected_text_and_sprite.size = LIST_ICON_BUFFER_LEN;
 
-	icon[LIST_LOCATION_ICON].data.indirected_text_and_sprite.text = buffer;
-	icon[LIST_LOCATION_ICON].data.indirected_text_and_sprite.size = LIST_ICON_BUFFER_LEN;
-
 	icon[LIST_STATUS_ICON].data.indirected_text_and_sprite.text = buffer;
 	icon[LIST_STATUS_ICON].data.indirected_text_and_sprite.size = LIST_ICON_BUFFER_LEN;
 
@@ -632,31 +628,6 @@ static void list_redraw_handler(wimp_draw *redraw)
 				buffer[LIST_ICON_BUFFER_LEN - 1] = '\0';
 
 				wimp_plot_icon(&(icon[LIST_HEIGHT_ICON]));
-
-				/* Plot the Location icon. */
-
-				icon[LIST_LOCATION_ICON].extent.y0 = LINE_Y0(y);
-				icon[LIST_LOCATION_ICON].extent.y1 = LINE_Y1(y);
-
-				switch(paper[list_index[y].index].source) {
-				case PAPER_SOURCE_MASTER:
-					token = "PaperFileM";
-					break;
-				case PAPER_SOURCE_DEVICE:
-					token = "PaperFileD";
-					break;
-				case PAPER_SOURCE_USER:
-					token = "PaperFileU";
-					break;
-				default:
-					token = "";
-					break;
-				}
-
-				msgs_lookup(token, buffer, LIST_ICON_BUFFER_LEN);
-				buffer[LIST_ICON_BUFFER_LEN - 1] = '\0';
-
-				wimp_plot_icon(&(icon[LIST_LOCATION_ICON]));
 
 				/* Plot the PS filename icon. */
 
