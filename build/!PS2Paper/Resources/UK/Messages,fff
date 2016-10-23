@@ -33,9 +33,9 @@ SupportURL:http://www.stevefryatt.org.uk/software/
 
 # Papers
 
-PaperFileM:Master
-PaperFileU:User
-PaperFileD:Device
+PaperFileM:Master Paper Definitions
+PaperFileU:User Paper Definitions
+PaperFileD:Device Paper Definitions
 
 PaperStatMiss:Missing
 PaperStatUnkn:Unknown
@@ -52,10 +52,12 @@ PaperNoMem:There was not enough memory to create the paper list.
 #
 # Window icon data (particularly toolbar items) may be in menu data when duplicates exist.
 
-Help.IconBar:\TPS2Paper application.|M\Sopen a list of paper sizes.
+Help.IconBar:\TPS2Paper application, which manages paper sizes for the Level 2 Postscript driver.|M\Sopen a list of paper sizes.|MIt is not required for the Level 3 driver.
 
 Help.ProgInfo:\TPS2Paper information \w.
 Help.ProgInfo.Website:\Svisit the PS2Paper website, if you have Internet access.
+
+Help.ListTB.Select:\Sselect all of the paper definitions.|m\Aclear the current selection.
 
 # Interactive help for menus.
 #
@@ -64,3 +66,7 @@ Help.ProgInfo.Website:\Svisit the PS2Paper website, if you have Internet access.
 Help.IconBarMenu.00:\Rsee information about PS2Paper.
 Help.IconBarMenu.01:\Sread the online manual.
 Help.IconBarMenu.02:\Squit PS2Paper.
+
+Help.ListMenu.00:\Sselect all of the paper definitions.
+Help.ListMenu.01:\Sclear the current selection.
+Help.ListTB.Refresh/Help.ListMenu.02:\Srefresh the details of the paper definitions.

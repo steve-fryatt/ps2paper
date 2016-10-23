@@ -180,7 +180,7 @@ void list_initialise(osspriteop_area *sprites)
 	int		icon;
 
 	list_window_menu = templates_get_menu("ListWindowMenu");
-	ihelp_add_menu(list_window_menu, "ListWindowMenu");
+	ihelp_add_menu(list_window_menu, "ListMenu");
 
 	list_window_def = templates_load_window("Paper");
 	list_pane_def = templates_load_window("PaperTB");
