@@ -634,6 +634,11 @@ static void list_redraw_handler(wimp_draw *redraw)
 				icon[LIST_FILENAME_ICON].data.indirected_text_and_sprite.text = paper[list_index[y].index].ps2_file;
 				icon[LIST_FILENAME_ICON].data.indirected_text_and_sprite.size = PAPER_FILE_LEN;
 
+				if (paper[list_index[y].index].ps2_file_status == PAPER_STATUS_MISSING)
+					icon[LIST_FILENAME_ICON].flags |= wimp_ICON_SHADED;
+				else
+					icon[LIST_FILENAME_ICON].flags &= ~wimp_ICON_SHADED;
+
 				wimp_plot_icon(&(icon[LIST_FILENAME_ICON]));
 
 				/* Plot the PS file status icon. */
