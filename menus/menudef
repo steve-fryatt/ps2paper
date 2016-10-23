@@ -43,5 +43,8 @@ menu(IconBarMenu, "PS2 Paper")
 menu(ListWindowMenu, "PS2 Paper")
 {
 	item("Select all");
-	item("Clear selection");
+	item("Clear selection") {
+		dotted;
+	}
+	item("Refresh");
 }

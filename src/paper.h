@@ -80,6 +80,14 @@ struct paper_size {
 
 void paper_initialise(void);
 
+
+/**
+ * Reset the paper definitions, then read them back in from the source
+ * files in Printers.
+ */
+
+void paper_read_definitions(void);
+
 size_t paper_get_definition_count(void);
 
 struct paper_size *paper_get_definitions(void);

@@ -70,7 +70,6 @@ static struct paper_size	*paper_sizes = NULL;		/**< Linked list of paper sizes.	
 static size_t			paper_allocation = 0;		/**< The number of spaces allocated for paper definitions.	*/
 static size_t			paper_count = 0;		/**< Number of defined paper sizes.				*/
 
-static void			paper_read_definitions(void);
 static void			paper_clear_definitions(void);
 static osbool			paper_allocate_definition_space(unsigned new_allocation);
 static osbool			paper_read_def_file(char *file, enum paper_source source);
@@ -99,7 +98,7 @@ void paper_initialise(void)
  * files in Printers.
  */
 
-static void paper_read_definitions(void)
+void paper_read_definitions(void)
 {
 	paper_clear_definitions();
 

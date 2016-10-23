@@ -87,6 +87,7 @@
 
 #define LIST_MENU_SELECT_ALL 0
 #define LIST_MENU_CLEAR_SELECTION 1
+#define LIST_MENU_REFRESH 2
 
 enum list_units {
 	LIST_UNITS_MM = 0,
@@ -296,6 +297,10 @@ static void list_toolbar_click_handler(wimp_pointer *pointer)
 		return;
 
 	switch ((int) pointer->i) {
+	case LIST_REFRESH_ICON:
+		paper_read_definitions();
+		windows_redraw(list_window);
+		break;
 	case LIST_SELECT_ICON:
 		if (pointer->buttons == wimp_CLICK_SELECT)
 			list_select_all();
@@ -318,11 +323,6 @@ static void list_toolbar_click_handler(wimp_pointer *pointer)
 		break;
 	}
 }
-
-
-
-
-
 
 
 /**
@@ -444,6 +444,11 @@ static void list_menu_selection(wimp_w w, wimp_menu *menu, wimp_selection *selec
 		list_selection_from_menu = FALSE;
 		break;
 
+	case LIST_MENU_REFRESH:
+		paper_read_definitions();
+		windows_redraw(list_window);
+		break;
+
 //	case RESULTS_MENU_OPEN_PARENT:
 //		if (handle->selection_count == 1)
 //			results_open_parent(handle, handle->selection_row);
@@ -485,10 +490,6 @@ static void list_menu_close(wimp_w w, wimp_menu *menu)
 	list_select_none();
 	list_selection_from_menu = FALSE;
 }
-
-
-
-
 
 
 /**
