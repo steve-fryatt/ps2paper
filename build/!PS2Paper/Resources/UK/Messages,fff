@@ -58,6 +58,13 @@ Help.IconBar:\TPS2Paper application, which manages paper sizes for the Level 2 P
 Help.ProgInfo:\TPS2Paper information \w.
 Help.ProgInfo.Website:\Svisit the PS2Paper website, if you have Internet access.
 
+Help.List.Col0:\Tname of the paper.
+Help.List.Col1:\Twidth of the paper, as given in the definition.
+Help.List.Col2:\Theight of the paper, as given in the definition.
+Help.List.Col3:\Tfile which can be used to insert the paper dimensions into the Postscript stream.
+Help.List.Col4:\Tstatus of the Postscript file.
+Help.List.Separator:\Tstart of a new set of paper definitions.
+
 Help.ListTB.Select:\Sselect all of the paper definitions.|m\Aclear the current selection.
 
 # Interactive help for menus.

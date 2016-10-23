@@ -154,6 +154,7 @@ static void list_menu_selection(wimp_w w, wimp_menu *menu, wimp_selection *selec
 static void list_menu_close(wimp_w w, wimp_menu *menu);
 static void list_redraw_handler(wimp_draw *redraw);
 static void list_add_paper_source_to_index(enum paper_source source, size_t index_lines, struct paper_size *paper, size_t paper_lines);
+static void list_decode_window_help(char *buffer, wimp_w w, wimp_i i, os_coord pos, wimp_mouse_state buttons);
 static int list_calculate_window_click_column(os_coord *pos, wimp_window_state *state);
 static int list_calculate_window_click_row(os_coord *pos, wimp_window_state *state);
 static void list_select_click_select(int row);
@@ -228,7 +229,7 @@ void list_initialise(osspriteop_area *sprites)
 		return;
 	}
 
-	ihelp_add_window(list_window, "List", NULL);
+	ihelp_add_window(list_window, "List", list_decode_window_help);
 	ihelp_add_window(list_pane, "ListTB", NULL);
 
 	event_add_window_menu(list_window, list_window_menu);
@@ -807,6 +808,44 @@ static void list_add_paper_source_to_index(enum paper_source source, size_t inde
 
 
 /**
+ * Turn a mouse position over the list window into an interactive
+ * help token.
+ *
+ * \param *buffer		A buffer to take the generated token.
+ * \param w			The window under the pointer.
+ * \param i			The icon under the pointer.
+ * \param pos			The current mouse position.
+ * \param buttons		The current mouse button state.
+ */
+
+static void list_decode_window_help(char *buffer, wimp_w w, wimp_i i, os_coord pos, wimp_mouse_state buttons)
+{
+	int			row, column;
+	wimp_window_state	window;
+
+	*buffer = '\0';
+
+	window.w = list_window;
+	wimp_get_window_state(&window);
+
+	row = list_calculate_window_click_row(&pos, &window);
+	column = list_calculate_window_click_column(&pos, &window);
+
+	if (row < 0 || row >= list_index_count)
+		return;
+
+	switch (list_index[row].type) {
+	case LIST_LINE_TYPE_PAPER:
+		sprintf(buffer, "Col%d", column);
+		break;
+	case LIST_LINE_TYPE_SEPARATOR:
+		sprintf(buffer, "Separator");
+		break;
+	}
+}
+
+
+/**
  * Calculate the column that the mouse was clicked over in the list window.
  *
  * \param  *pointer		The Wimp pointer data.
@@ -816,7 +855,7 @@ static void list_add_paper_source_to_index(enum paper_source source, size_t inde
 
 static int list_calculate_window_click_column(os_coord *pos, wimp_window_state *state)
 {
-	int		x, column;
+	int	x;
 
 	x = pos->x - state->visible.x0 + state->xscroll;
 
