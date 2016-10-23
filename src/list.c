@@ -59,6 +59,8 @@
 #include "columns.h"
 #include "paper.h"
 
+/* The page dimensions. */
+
 #define LIST_TOOLBAR_HEIGHT 132						/**< The height of the toolbar in OS units.				*/
 #define LIST_LINE_HEIGHT 56						/**< The height of a results line, in OS units.				*/
 #define LIST_WINDOW_MARGIN 4						/**< The margin around the edge of the window, in OS units.		*/
@@ -66,7 +68,11 @@
 #define LIST_ICON_INSET 4						/**< The left-hand inset for an icon containing a sprite.		*/
 #define LIST_ICON_HEIGHT 52						/**< The height of an icon in the results window, in OS units.		*/
 
+/* Memory allocation. */
+
 #define LIST_ICON_BUFFER_LEN 128					/**< The scratch buffer used for formatting text for display.		*/
+
+/* The main window icons. */
 
 #define LIST_NAME_ICON 0
 #define LIST_WIDTH_ICON 1
@@ -76,6 +82,8 @@
 #define LIST_UNKNOWN1_ICON 5
 #define LIST_UNKNOWN2_ICON 6
 #define LIST_SEPARATOR_ICON 7
+
+/* The toolbar pane icons. */
 
 #define LIST_REFRESH_ICON 0
 #define LIST_SELECT_ICON 1
@@ -90,11 +98,21 @@
 #define LIST_MM_ICON 9
 #define LIST_POINT_ICON 10
 
+/* The menu entries. */
+
 #define LIST_MENU_SELECT_ALL 0
 #define LIST_MENU_CLEAR_SELECTION 1
 #define LIST_MENU_REFRESH 2
 
+/* The number of columns in the window. */
+
 #define LIST_COLUMN_COUNT 5
+
+/* The column numbers. */
+
+#define LIST_COLUMN_PAPER_NAME 0
+
+/* The column definitions. */
 
 static struct columns_definition list_column_definitions[] = {
 	{ LIST_NAME_ICON, LIST_NAME_HEADING_ICON, 436, LIST_LINE_OFFSET + LIST_ICON_INSET, LIST_LINE_OFFSET, -1, -1, COLUMNS_FLAGS_NONE },
@@ -157,8 +175,8 @@ static void list_add_paper_source_to_index(enum paper_source source, size_t inde
 static void list_decode_window_help(char *buffer, wimp_w w, wimp_i i, os_coord pos, wimp_mouse_state buttons);
 static int list_calculate_window_click_column(os_coord *pos, wimp_window_state *state);
 static int list_calculate_window_click_row(os_coord *pos, wimp_window_state *state);
-static void list_select_click_select(int row);
-static void list_select_click_adjust(unsigned row);
+static void list_select_click_select(int row, int column);
+static void list_select_click_adjust(int row, int column);
 static void list_select_all(void);
 static void list_select_none(void);
 
@@ -296,15 +314,13 @@ static void list_click_handler(wimp_pointer *pointer)
 	row = list_calculate_window_click_row(&(pointer->pos), &state);
 	column = list_calculate_window_click_column(&(pointer->pos), &state);
 
-	debug_printf("Click in row %d, column %d", row, column);
-
 	switch(pointer->buttons) {
 	case wimp_CLICK_SELECT:
-		list_select_click_select(row);
+		list_select_click_select(row, column);
 		break;
 
 	case wimp_CLICK_ADJUST:
-		list_select_click_adjust(row);
+		list_select_click_adjust(row, column);
 		break;
 	}
 }
@@ -371,7 +387,7 @@ static void list_menu_prepare(wimp_w w, wimp_menu *menu, wimp_pointer *pointer)
 
 		row = list_calculate_window_click_row(&(pointer->pos), &state);
 		if (list_selection_count == 0) {
-			list_select_click_select(row);
+			list_select_click_select(row, LIST_COLUMN_PAPER_NAME);
 			list_selection_from_menu = TRUE;
 		} else {
 			list_selection_from_menu = FALSE;
@@ -892,15 +908,16 @@ static int list_calculate_window_click_row(os_coord *pos, wimp_window_state *sta
  * window.
  *
  * \param row			The row under the click, or -1.
+ * \param column		The column under the click, or -1.
  */
 
-static void list_select_click_select(int row)
+static void list_select_click_select(int row, int column)
 {
 	wimp_window_state	window;
 
 	/* If the click is on a selection, nothing changes. */
 
-	if ((row != -1) && (row < list_index_count) && (list_index[row].flags & LIST_LINE_FLAGS_SELECTED))
+	if ((row != -1) && (row < list_index_count) && (column == LIST_COLUMN_PAPER_NAME) && (list_index[row].flags & LIST_LINE_FLAGS_SELECTED))
 		return;
 
 	/* Clear everything and then try to select the clicked line. */
@@ -911,15 +928,16 @@ static void list_select_click_select(int row)
 	if (xwimp_get_window_state(&window) != NULL)
 		return;
 
-	if ((row != -1) && (row < list_index_count) && (list_index[row].type == LIST_LINE_TYPE_PAPER)) {
-		list_index[row].flags |= LIST_LINE_FLAGS_SELECTED;
-		list_selection_count++;
-		if (list_selection_count == 1)
-			list_selection_row = row;
+	if ((row == -1) || (column != LIST_COLUMN_PAPER_NAME) || (row >= list_index_count) || (list_index[row].type != LIST_LINE_TYPE_PAPER))
+		return;
 
-		wimp_force_redraw(window.w, window.xscroll, LINE_BASE(row),
-				window.xscroll + (window.visible.x1 - window.visible.x0), LINE_Y1(row));
-	}
+	list_index[row].flags |= LIST_LINE_FLAGS_SELECTED;
+	list_selection_count++;
+	if (list_selection_count == 1)
+		list_selection_row = row;
+
+	wimp_force_redraw(window.w, window.xscroll, LINE_BASE(row),
+			window.xscroll + (window.visible.x1 - window.visible.x0), LINE_Y1(row));
 }
 
 
@@ -928,14 +946,15 @@ static void list_select_click_select(int row)
  * window.
  *
  * \param row			The row under the click, or RESULTS_ROW_NONE.
+ * \param column		The column under the click, or -1.
  */
 
-static void list_select_click_adjust(unsigned row)
+static void list_select_click_adjust(int row, int column)
 {
 	int			i;
 	wimp_window_state	window;
 
-	if ((row == -1) || (row >= list_index_count) || (list_index[row].type != LIST_LINE_TYPE_PAPER))
+	if ((row == -1) || (column != LIST_COLUMN_PAPER_NAME) || (row >= list_index_count) || (list_index[row].type != LIST_LINE_TYPE_PAPER))
 		return;
 
 	window.w = list_window;
