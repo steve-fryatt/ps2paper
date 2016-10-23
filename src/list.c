@@ -481,8 +481,6 @@ static void list_menu_selection(wimp_w w, wimp_menu *menu, wimp_selection *selec
 
 static void list_menu_close(wimp_w w, wimp_menu *menu)
 {
-	struct results_window	*handle = event_get_window_user_data(w);
-
 	if (list_selection_from_menu == FALSE)
 		return;
 
