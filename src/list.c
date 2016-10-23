@@ -315,12 +315,16 @@ static void list_click_handler(wimp_pointer *pointer)
 	column = list_calculate_window_click_column(&(pointer->pos), &state);
 
 	switch(pointer->buttons) {
-	case wimp_CLICK_SELECT:
+	case wimp_SINGLE_SELECT:
 		list_select_click_select(row, column);
 		break;
 
-	case wimp_CLICK_ADJUST:
+	case wimp_SINGLE_ADJUST:
 		list_select_click_adjust(row, column);
+		break;
+
+	case wimp_DOUBLE_SELECT:
+		debug_printf("Double-click on part of the window");
 		break;
 	}
 }
