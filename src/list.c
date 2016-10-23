@@ -63,6 +63,7 @@
 #define LIST_LINE_HEIGHT 56						/**< The height of a results line, in OS units.				*/
 #define LIST_WINDOW_MARGIN 4						/**< The margin around the edge of the window, in OS units.		*/
 #define LIST_LINE_OFFSET 4						/**< The offset from the base of a line to the base of the icon.	*/
+#define LIST_ICON_INSET 4						/**< The left-hand inset for an icon containing a sprite.		*/
 #define LIST_ICON_HEIGHT 52						/**< The height of an icon in the results window, in OS units.		*/
 
 #define LIST_ICON_BUFFER_LEN 128					/**< The scratch buffer used for formatting text for display.		*/
@@ -96,11 +97,11 @@
 #define LIST_COLUMN_COUNT 5
 
 static struct columns_definition list_column_definitions[] = {
-	{ LIST_NAME_ICON, LIST_NAME_HEADING_ICON, 436, -1, -1, COLUMNS_FLAGS_NONE },
-	{ LIST_WIDTH_ICON, LIST_WIDTH_HEADING_ICON, 156, -1, -1, COLUMNS_FLAGS_NONE },
-	{ LIST_HEIGHT_ICON, LIST_HEIGHT_HEADING_ICON, 156, -1, -1, COLUMNS_FLAGS_NONE },
-	{ LIST_FILENAME_ICON, LIST_FILENAME_HEADING_ICON, 360, -1, -1, COLUMNS_FLAGS_NONE },
-	{ LIST_STATUS_ICON, LIST_STATUS_HEADING_ICON, 164, -1, -1, COLUMNS_FLAGS_NONE }
+	{ LIST_NAME_ICON, LIST_NAME_HEADING_ICON, 436, LIST_LINE_OFFSET + LIST_ICON_INSET, LIST_LINE_OFFSET, -1, -1, COLUMNS_FLAGS_NONE },
+	{ LIST_WIDTH_ICON, LIST_WIDTH_HEADING_ICON, 156, LIST_LINE_OFFSET, LIST_LINE_OFFSET, -1, -1, COLUMNS_FLAGS_NONE },
+	{ LIST_HEIGHT_ICON, LIST_HEIGHT_HEADING_ICON, 156, LIST_LINE_OFFSET, LIST_LINE_OFFSET, -1, -1, COLUMNS_FLAGS_NONE },
+	{ LIST_FILENAME_ICON, LIST_FILENAME_HEADING_ICON, 360, LIST_LINE_OFFSET + LIST_ICON_INSET, LIST_LINE_OFFSET, -1, -1, COLUMNS_FLAGS_NONE },
+	{ LIST_STATUS_ICON, LIST_STATUS_HEADING_ICON, 164, LIST_LINE_OFFSET, LIST_LINE_OFFSET, -1, -1, COLUMNS_FLAGS_NONE }
 };
 
 enum list_units {
@@ -250,13 +251,12 @@ void list_initialise(osspriteop_area *sprites)
 
 	icons_set_radio_group_selected(list_pane, list_display_units, 3, LIST_MM_ICON, LIST_INCH_ICON, LIST_POINT_ICON);
 
-//	for (icon = 0; icon <= LIST_STATUS_ICON; icon++) {
-//		list_window_def->icons[icon].extent.x0 = list_pane_def->icons[icon + LIST_NAME_HEADING_ICON].extent.x0 + (LIST_LINE_OFFSET / 2);
-//		list_window_def->icons[icon].extent.x1 = list_pane_def->icons[icon + LIST_NAME_HEADING_ICON].extent.x1 - (LIST_LINE_OFFSET / 2);
-//	}
+	/* Set the left- and right-hand edges of the section icon to suit the window size. */
 
-	list_window_def->icons[LIST_SEPARATOR_ICON].extent.x0 = list_window_def->icons[LIST_NAME_ICON].extent.x0 - (LIST_LINE_OFFSET / 2);
-	list_window_def->icons[LIST_SEPARATOR_ICON].extent.x1 = list_window_def->icons[LIST_STATUS_ICON].extent.x1 + (LIST_LINE_OFFSET / 2);
+	list_window_def->icons[LIST_SEPARATOR_ICON].extent.x0 = list_window_def->extent.x0;
+	list_window_def->icons[LIST_SEPARATOR_ICON].extent.x1 = list_window_def->extent.x1;
+
+	/* Allocate a token amount of memory to initialise the flex block. */
 
 	if (flex_alloc((flex_ptr) &list_index, 4) == 0)
 		list_index = NULL;

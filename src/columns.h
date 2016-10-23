@@ -39,22 +39,72 @@
 
 struct columns_block;
 
+/**
+ * Flags relating to the column definition.
+ */
+
 enum columns_flags {
-	COLUMNS_FLAGS_NONE = 0
+	COLUMNS_FLAGS_NONE = 0				/**< No flags are set.		*/
 };
+
+/**
+ * A column, to be defined by the client.
+ */
 
 struct columns_definition {
-	wimp_i			column_icon;
-	wimp_i			heading_icon;
-	int			width;
-	int			min_width;
-	int			max_width;
-	enum columns_flags	flags;
+	wimp_i			column_icon;		/**< The handle of the main window icon relating to the column.		*/
+	wimp_i			heading_icon;		/**< The handle of the toolbar pane icon holding the column heading.	*/
+
+	int			width;			/**< The initial width of the column, in OS units.			*/
+	int			left_margin;		/**< The left-hand margin of the column, in OS units.			*/
+	int			right_margin;		/**< The right-hand margin of the column, in OS units.			*/
+	int			min_width;		/**< The minimum width of the colum, in OS units (if draggable).	*/
+	int			max_width;		/**< The maximum width of the colum, in OS units (if draggable).	*/
+
+	enum columns_flags	flags;			/**< Flags relating to the column.					*/
 };
 
+
+/**
+ * Create a new column definition instance, and return a handle for the instance
+ * data.
+ * 
+ * \param *window_def		The definition of the window to take the columns.
+ * \param *toolbar_def		The definition of the toolbar to hold the column headings.
+ * \param columns[]		Definitions of the columns in the window.
+ * \param column_count		The number of columns in the definition.
+ * \return			The handle of the new window column instance, or NULL on failure.
+ */
+
 struct columns_block *columns_create_window(wimp_window *window_def, wimp_window *toolbar_def, struct columns_definition columns[], size_t column_count);
+
+
+/**
+ * Set, update or clear the handle of the main window holding the columns.
+ * 
+ * \param *handle		The handle of the column instance to update.
+ * \param window		The new window handle, or NULL if the window has been deleted.
+ */
+
 void columns_set_window_handle(struct columns_block *handle, wimp_w window);
+
+
+/**
+ * Set, update or clear the handle of the toolbar pane window holding the column headings.
+ * 
+ * \param *handle		The handle of the column instance to update.
+ * \param window		The new window handle, or NULL if the window has been deleted.
+ */
+
 void columns_set_toolbar_handle(struct columns_block *handle, wimp_w toolbar);
+
+
+/**
+ * Update the icon positions in the windows.
+ * 
+ * \param *handle		The handle of the column instance to update.
+ */
+
 void columns_adjust_icons(struct columns_block *handle);
 
 #endif
