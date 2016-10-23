@@ -56,6 +56,7 @@
 
 #include "list.h"
 
+#include "columns.h"
 #include "paper.h"
 
 #define LIST_TOOLBAR_HEIGHT 132						/**< The height of the toolbar in OS units.				*/
@@ -79,6 +80,10 @@
 #define LIST_SELECT_ICON 1
 
 #define LIST_NAME_HEADING_ICON 2
+#define LIST_WIDTH_HEADING_ICON 3
+#define LIST_HEIGHT_HEADING_ICON 4
+#define LIST_FILENAME_HEADING_ICON 5
+#define LIST_STATUS_HEADING_ICON 6
 
 #define LIST_INCH_ICON 8
 #define LIST_MM_ICON 9
@@ -87,6 +92,16 @@
 #define LIST_MENU_SELECT_ALL 0
 #define LIST_MENU_CLEAR_SELECTION 1
 #define LIST_MENU_REFRESH 2
+
+#define LIST_COLUMN_COUNT 5
+
+static struct columns_definition list_column_definitions[] = {
+	{ LIST_NAME_ICON, LIST_NAME_HEADING_ICON, 436, -1, -1, COLUMNS_FLAGS_NONE },
+	{ LIST_WIDTH_ICON, LIST_WIDTH_HEADING_ICON, 156, -1, -1, COLUMNS_FLAGS_NONE },
+	{ LIST_HEIGHT_ICON, LIST_HEIGHT_HEADING_ICON, 156, -1, -1, COLUMNS_FLAGS_NONE },
+	{ LIST_FILENAME_ICON, LIST_FILENAME_HEADING_ICON, 360, -1, -1, COLUMNS_FLAGS_NONE },
+	{ LIST_STATUS_ICON, LIST_STATUS_HEADING_ICON, 164, -1, -1, COLUMNS_FLAGS_NONE }
+};
 
 enum list_units {
 	LIST_UNITS_MM = 0,
@@ -118,6 +133,8 @@ static wimp_w			list_window = NULL;			/**< The list window handle.				*/
 static wimp_w			list_pane = NULL;			/**< The list pane handle.				*/
 
 static wimp_menu		*list_window_menu = NULL;		/**< The list window menu.				*/
+
+static struct columns_block	*list_columns = NULL;			/**< The column handler for the list window columns.	*/
 
 static enum list_units		list_display_units;			/**< The units used to display paper sizes.		*/
 
@@ -191,6 +208,11 @@ void list_initialise(osspriteop_area *sprites)
 
 	windows_place_as_toolbar(list_window_def, list_pane_def, LIST_TOOLBAR_HEIGHT - 4);
 
+	list_columns = columns_create_window(list_window_def, list_pane_def, list_column_definitions, LIST_COLUMN_COUNT);
+	if (list_columns == NULL)
+		error_msgs_report_fatal("ColNoMem");
+	columns_adjust_icons(list_columns);
+
 	error = xwimp_create_window(list_window_def, &list_window);
 	if (error != NULL) {
 		error_report_os_error(error, wimp_ERROR_BOX_CANCEL_ICON);
@@ -228,10 +250,10 @@ void list_initialise(osspriteop_area *sprites)
 
 	icons_set_radio_group_selected(list_pane, list_display_units, 3, LIST_MM_ICON, LIST_INCH_ICON, LIST_POINT_ICON);
 
-	for (icon = 0; icon <= LIST_STATUS_ICON; icon++) {
-		list_window_def->icons[icon].extent.x0 = list_pane_def->icons[icon + LIST_NAME_HEADING_ICON].extent.x0 + (LIST_LINE_OFFSET / 2);
-		list_window_def->icons[icon].extent.x1 = list_pane_def->icons[icon + LIST_NAME_HEADING_ICON].extent.x1 - (LIST_LINE_OFFSET / 2);
-	}
+//	for (icon = 0; icon <= LIST_STATUS_ICON; icon++) {
+//		list_window_def->icons[icon].extent.x0 = list_pane_def->icons[icon + LIST_NAME_HEADING_ICON].extent.x0 + (LIST_LINE_OFFSET / 2);
+//		list_window_def->icons[icon].extent.x1 = list_pane_def->icons[icon + LIST_NAME_HEADING_ICON].extent.x1 - (LIST_LINE_OFFSET / 2);
+//	}
 
 	list_window_def->icons[LIST_SEPARATOR_ICON].extent.x0 = list_window_def->icons[LIST_NAME_ICON].extent.x0 - (LIST_LINE_OFFSET / 2);
 	list_window_def->icons[LIST_SEPARATOR_ICON].extent.x1 = list_window_def->icons[LIST_STATUS_ICON].extent.x1 + (LIST_LINE_OFFSET / 2);

@@ -30,7 +30,7 @@ APP := !PS2Paper
 SHHELP := PS2Paper,3d6
 HTMLHELP := manual.html
 
-OBJS = iconbar.o list.o main.o paper.o
+OBJS = columns.o iconbar.o list.o main.o paper.o
 
 include $(SFTOOLS_MAKE)/CApp
 

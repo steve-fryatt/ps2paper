@@ -47,6 +47,7 @@ PaperStatNOK:Incorrect
 NoSprites:The application sprites file could not be opened.
 BadTemplate:Window template '%0' not found.
 PaperNoMem:There was not enough memory to create the paper list.
+ColNoMem:There was not enough memory to create the list window columns.
 
 # Interactive Help for windows and icons.
 #
