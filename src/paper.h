@@ -92,5 +92,6 @@ size_t paper_get_definition_count(void);
 
 struct paper_size *paper_get_definitions(void);
 
+void paper_launch_file(int definition);
 
 #endif

@@ -40,12 +40,14 @@
 /* OSLib header files */
 
 #include "oslib/fileswitch.h"
+#include "oslib/os.h"
 #include "oslib/osfile.h"
 #include "oslib/types.h"
 
 /* SF-Lib header files. */
 
 #include "sflib/debug.h"
+#include "sflib/errors.h"
 #include "sflib/string.h"
 
 /* Application header files */
@@ -118,6 +120,21 @@ size_t paper_get_definition_count(void)
 struct paper_size *paper_get_definitions(void)
 {
 	return paper_sizes;
+}
+
+void paper_launch_file(int definition)
+{
+	char		buffer[PAPER_MAX_LINE_LEN];
+	os_error	*error;
+
+	if (definition < 0 || definition >= paper_count || paper_sizes[definition].ps2_file_status == PAPER_STATUS_MISSING)
+		return;
+
+	snprintf(buffer, PAPER_MAX_LINE_LEN, "%%Filer_Run -Shift Printers:ps.Paper.%s", paper_sizes[definition].ps2_file);
+	buffer[PAPER_MAX_LINE_LEN - 1] = '\0';
+	error = xos_cli(buffer);
+	if (error != NULL)
+		error_report_os_error(error, wimp_ERROR_BOX_OK_ICON);
 }
 
 /**

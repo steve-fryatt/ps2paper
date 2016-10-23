@@ -111,6 +111,7 @@
 /* The column numbers. */
 
 #define LIST_COLUMN_PAPER_NAME 0
+#define LIST_COLUMN_PAPER_FILE 3
 
 /* The column definitions. */
 
@@ -175,6 +176,7 @@ static void list_add_paper_source_to_index(enum paper_source source, size_t inde
 static void list_decode_window_help(char *buffer, wimp_w w, wimp_i i, os_coord pos, wimp_mouse_state buttons);
 static int list_calculate_window_click_column(os_coord *pos, wimp_window_state *state);
 static int list_calculate_window_click_row(os_coord *pos, wimp_window_state *state);
+static void list_double_click_select(int row, int column);
 static void list_select_click_select(int row, int column);
 static void list_select_click_adjust(int row, int column);
 static void list_select_all(void);
@@ -324,7 +326,7 @@ static void list_click_handler(wimp_pointer *pointer)
 		break;
 
 	case wimp_DOUBLE_SELECT:
-		debug_printf("Double-click on part of the window");
+		list_double_click_select(row, column);
 		break;
 	}
 }
@@ -906,6 +908,21 @@ static int list_calculate_window_click_row(os_coord *pos, wimp_window_state *sta
 	return row;
 }
 
+
+/**
+ * Process a Select double-click over the list window.
+ * 
+ * \param row			The row under the double click, or -1.
+ * \param column		The column under the double click, or -1.
+ */
+
+static void list_double_click_select(int row, int column)
+{
+	if ((row == -1) || (list_index[row].type != LIST_LINE_TYPE_PAPER) || (column != LIST_COLUMN_PAPER_FILE))
+		return;
+
+	paper_launch_file(list_index[row].index);
+}
 
 /**
  * Update the current selection based on a select click over a row of the
