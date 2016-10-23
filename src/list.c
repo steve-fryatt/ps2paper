@@ -154,6 +154,7 @@ static void list_menu_selection(wimp_w w, wimp_menu *menu, wimp_selection *selec
 static void list_menu_close(wimp_w w, wimp_menu *menu);
 static void list_redraw_handler(wimp_draw *redraw);
 static void list_add_paper_source_to_index(enum paper_source source, size_t index_lines, struct paper_size *paper, size_t paper_lines);
+static int list_calculate_window_click_column(os_coord *pos, wimp_window_state *state);
 static int list_calculate_window_click_row(os_coord *pos, wimp_window_state *state);
 static void list_select_click_select(int row);
 static void list_select_click_adjust(unsigned row);
@@ -212,6 +213,7 @@ void list_initialise(osspriteop_area *sprites)
 	list_columns = columns_create_window(list_window_def, list_pane_def, list_column_definitions, LIST_COLUMN_COUNT);
 	if (list_columns == NULL)
 		error_msgs_report_fatal("ColNoMem");
+
 	columns_adjust_icons(list_columns);
 
 	error = xwimp_create_window(list_window_def, &list_window);
@@ -283,7 +285,7 @@ void list_open_window(void)
 static void list_click_handler(wimp_pointer *pointer)
 {
 	wimp_window_state	state;
-	int			row;
+	int			row, column;
 
 
 	state.w = pointer->w;
@@ -291,8 +293,9 @@ static void list_click_handler(wimp_pointer *pointer)
 		return;
 
 	row = list_calculate_window_click_row(&(pointer->pos), &state);
+	column = list_calculate_window_click_column(&(pointer->pos), &state);
 
-	debug_printf("Click in row %d", row);
+	debug_printf("Click in row %d, column %d", row, column);
 
 	switch(pointer->buttons) {
 	case wimp_CLICK_SELECT:
@@ -800,6 +803,24 @@ static void list_add_paper_source_to_index(enum paper_source source, size_t inde
 			list_index_count++;
 		}
 	}
+}
+
+
+/**
+ * Calculate the column that the mouse was clicked over in the list window.
+ *
+ * \param  *pointer		The Wimp pointer data.
+ * \param  *state		The results window state.
+ * \return			The column (from 0) or -1 if none.
+ */
+
+static int list_calculate_window_click_column(os_coord *pos, wimp_window_state *state)
+{
+	int		x, column;
+
+	x = pos->x - state->visible.x0 + state->xscroll;
+
+	return columns_find_pointer(list_columns, x);
 }
 
 

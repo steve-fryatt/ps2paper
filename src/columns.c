@@ -174,3 +174,31 @@ void columns_adjust_icons(struct columns_block *handle)
 		xpos += handle->columns[column].width;
 	}
 }
+
+
+/**
+ * Identify which column the supplied X coordinate falls into.
+ * 
+ * \param *handle		The handle of the column instance to update.
+ * \param xpos			The X position within the window.
+ * \return			The identified column number, or -1.
+ */
+
+int columns_find_pointer(struct columns_block *handle, int xpos)
+{
+	int column;
+
+	if (handle == NULL)
+		return -1;
+
+	for (column = 0; column < handle->column_count && xpos > (handle->column_locations[column] + handle->columns[column].width); column++);
+
+	if (column >= handle->column_count)
+		return -1;
+
+	if ((xpos > (handle->column_locations[column] + handle->columns[column].width - handle->columns[column].right_margin)) ||
+			(xpos < (handle->column_locations[column] + handle->columns[column].left_margin)))
+		return -1;
+
+	return column;
+}

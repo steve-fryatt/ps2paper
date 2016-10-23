@@ -107,4 +107,15 @@ void columns_set_toolbar_handle(struct columns_block *handle, wimp_w toolbar);
 
 void columns_adjust_icons(struct columns_block *handle);
 
+
+/**
+ * Identify which column the supplied X coordinate falls into.
+ * 
+ * \param *handle		The handle of the column instance to update.
+ * \param xpos			The X position within the window.
+ * \return			The identified column number, or -1.
+ */
+
+int columns_find_pointer(struct columns_block *handle, int xpos);
+
 #endif
