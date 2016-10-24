@@ -37,6 +37,10 @@ PaperFileM:Master Paper Definitions
 PaperFileU:User Paper Definitions
 PaperFileD:Device Paper Definitions
 
+SizeStatOK:OK
+SizeStatAmb:Ambiguous
+SizeStatUnkn:Unknown
+
 PaperStatMiss:Missing
 PaperStatUnkn:Unknown
 PaperStatOK:Correct

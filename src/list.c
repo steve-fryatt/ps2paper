@@ -77,11 +77,10 @@
 #define LIST_NAME_ICON 0
 #define LIST_WIDTH_ICON 1
 #define LIST_HEIGHT_ICON 2
-#define LIST_FILENAME_ICON 3
-#define LIST_STATUS_ICON 4
-#define LIST_UNKNOWN1_ICON 5
-#define LIST_UNKNOWN2_ICON 6
-#define LIST_SEPARATOR_ICON 7
+#define LIST_SIZE_ICON 3
+#define LIST_FILENAME_ICON 4
+#define LIST_STATUS_ICON 5
+#define LIST_SEPARATOR_ICON 6
 
 /* The toolbar pane icons. */
 
@@ -91,8 +90,9 @@
 #define LIST_NAME_HEADING_ICON 2
 #define LIST_WIDTH_HEADING_ICON 3
 #define LIST_HEIGHT_HEADING_ICON 4
-#define LIST_FILENAME_HEADING_ICON 5
-#define LIST_STATUS_HEADING_ICON 6
+#define LIST_SIZE_HEADING_ICON 5
+#define LIST_FILENAME_HEADING_ICON 6
+#define LIST_STATUS_HEADING_ICON 7
 
 #define LIST_INCH_ICON 8
 #define LIST_MM_ICON 9
@@ -106,7 +106,7 @@
 
 /* The number of columns in the window. */
 
-#define LIST_COLUMN_COUNT 5
+#define LIST_COLUMN_COUNT 6
 
 /* The column numbers. */
 
@@ -119,6 +119,7 @@ static struct columns_definition list_column_definitions[] = {
 	{ LIST_NAME_ICON, LIST_NAME_HEADING_ICON, 436, LIST_LINE_OFFSET + LIST_ICON_INSET, LIST_LINE_OFFSET, -1, -1, COLUMNS_FLAGS_NONE },
 	{ LIST_WIDTH_ICON, LIST_WIDTH_HEADING_ICON, 156, LIST_LINE_OFFSET, LIST_LINE_OFFSET, -1, -1, COLUMNS_FLAGS_NONE },
 	{ LIST_HEIGHT_ICON, LIST_HEIGHT_HEADING_ICON, 156, LIST_LINE_OFFSET, LIST_LINE_OFFSET, -1, -1, COLUMNS_FLAGS_NONE },
+	{ LIST_SIZE_ICON, LIST_SIZE_HEADING_ICON, 164, LIST_LINE_OFFSET, LIST_LINE_OFFSET, -1, -1, COLUMNS_FLAGS_NONE },
 	{ LIST_FILENAME_ICON, LIST_FILENAME_HEADING_ICON, 360, LIST_LINE_OFFSET + LIST_ICON_INSET, LIST_LINE_OFFSET, -1, -1, COLUMNS_FLAGS_NONE },
 	{ LIST_STATUS_ICON, LIST_STATUS_HEADING_ICON, 164, LIST_LINE_OFFSET, LIST_LINE_OFFSET, -1, -1, COLUMNS_FLAGS_NONE }
 };
@@ -225,6 +226,7 @@ void list_initialise(osspriteop_area *sprites)
 	list_pane_def = templates_load_window("PaperTB");
 
 	list_window_def->sprite_area = sprites;
+	list_window_def->icon_count = 0;
 	list_pane_def->sprite_area = sprites;
 
 	list_display_units = LIST_UNITS_MM;
@@ -577,17 +579,16 @@ static void list_redraw_handler(wimp_draw *redraw)
 		break;
 	}
 
-	/* Set up the validation string buffer for text+sprite icons. */
-
-	*validation = 'S';
-	icon[LIST_UNKNOWN1_ICON].data.indirected_text.validation = validation;
-	icon[LIST_UNKNOWN2_ICON].data.indirected_text.validation = validation;
+	/* Set up the buffers for the icons. */
 
 	icon[LIST_WIDTH_ICON].data.indirected_text_and_sprite.text = buffer;
 	icon[LIST_WIDTH_ICON].data.indirected_text_and_sprite.size = LIST_ICON_BUFFER_LEN;
 
 	icon[LIST_HEIGHT_ICON].data.indirected_text_and_sprite.text = buffer;
 	icon[LIST_HEIGHT_ICON].data.indirected_text_and_sprite.size = LIST_ICON_BUFFER_LEN;
+
+	icon[LIST_SIZE_ICON].data.indirected_text_and_sprite.text = buffer;
+	icon[LIST_SIZE_ICON].data.indirected_text_and_sprite.size = LIST_ICON_BUFFER_LEN;
 
 	icon[LIST_STATUS_ICON].data.indirected_text_and_sprite.text = buffer;
 	icon[LIST_STATUS_ICON].data.indirected_text_and_sprite.size = LIST_ICON_BUFFER_LEN;
@@ -674,6 +675,34 @@ static void list_redraw_handler(wimp_draw *redraw)
 				buffer[LIST_ICON_BUFFER_LEN - 1] = '\0';
 
 				wimp_plot_icon(&(icon[LIST_HEIGHT_ICON]));
+
+				/* Plot the size status icon. */
+
+				icon[LIST_SIZE_ICON].extent.y0 = LINE_Y0(y);
+				icon[LIST_SIZE_ICON].extent.y1 = LINE_Y1(y);
+
+	//			switch(paper[list_index[y].index].ps2_file_status) {
+	//			case PAPER_STATUS_MISSING:
+	//				token = "PaperStatMiss";
+	//				break;
+	//			case PAPER_STATUS_UNKNOWN:
+					token = "SizeStatUnkn";
+	//				break;
+	//			case PAPER_STATUS_CORRECT:
+	//				token = "SizeStatOK";
+	//				break;
+	//			case PAPER_STATUS_INCORRECT:
+	//				token = "SizeStatAmb";
+	//				break;
+	//			default:
+	//				token = "";
+	//				break;
+	//			}
+
+				msgs_lookup(token, buffer, LIST_ICON_BUFFER_LEN);
+				buffer[LIST_ICON_BUFFER_LEN - 1] = '\0';
+
+				wimp_plot_icon(&(icon[LIST_SIZE_ICON]));
 
 				/* Plot the PS filename icon. */
 
