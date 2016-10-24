@@ -158,14 +158,11 @@ void columns_adjust_icons(struct columns_block *handle)
 	xpos = 0;
 
 	for (column = 0; column < handle->column_count; column++) {
-		debug_printf("Starting to process column %d", column);
 		icon = handle->columns[column].column_icon;
-		debug_printf("Main table icon: %d", icon);
 		handle->window_def->icons[icon].extent.x0 = xpos + handle->columns[column].left_margin;
 		handle->window_def->icons[icon].extent.x1 = xpos + handle->columns[column].width - handle->columns[column].right_margin;
 
 		icon = handle->columns[column].heading_icon;
-		debug_printf("Toolbar heading icon: %d", icon);
 		handle->toolbar_def->icons[icon].extent.x0 = xpos;
 		handle->toolbar_def->icons[icon].extent.x1 = xpos + handle->columns[column].width;
 
