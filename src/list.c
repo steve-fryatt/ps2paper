@@ -48,6 +48,7 @@
 #include "sflib/event.h"
 #include "sflib/icons.h"
 #include "sflib/ihelp.h"
+#include "sflib/menus.h"
 #include "sflib/msgs.h"
 #include "sflib/templates.h"
 #include "sflib/windows.h"
@@ -100,9 +101,10 @@
 
 /* The menu entries. */
 
-#define LIST_MENU_SELECT_ALL 0
-#define LIST_MENU_CLEAR_SELECTION 1
-#define LIST_MENU_REFRESH 2
+#define LIST_MENU_WRITE_SELECTED 0
+#define LIST_MENU_SELECT_ALL 1
+#define LIST_MENU_CLEAR_SELECTION 2
+#define LIST_MENU_REFRESH 3
 
 /* The number of columns in the window. */
 
@@ -182,6 +184,7 @@ static void list_select_click_select(int row, int column);
 static void list_select_click_adjust(int row, int column);
 static void list_select_all(void);
 static void list_select_none(void);
+static void list_write_selected_files(void);
 
 
 /* Line position calculations.
@@ -421,20 +424,7 @@ static void list_menu_prepare(wimp_w w, wimp_menu *menu, wimp_pointer *pointer)
 		}
 	}
 
-/*	menus_shade_entry(results_window_menu, RESULTS_MENU_CLEAR_SELECTION, handle->selection_count == 0);
-	menus_shade_entry(results_window_menu, RESULTS_MENU_OBJECT_INFO, handle->selection_count != 1);
-	menus_shade_entry(results_window_menu, RESULTS_MENU_OPEN_PARENT, handle->selection_count != 1);
-	menus_shade_entry(results_window_menu, RESULTS_MENU_COPY_NAMES, handle->selection_count == 0);
-	menus_shade_entry(results_window_menu, RESULTS_MENU_MODIFY_SEARCH, dialogue_window_is_open() || file_get_dialogue(handle->file) == NULL);
-	menus_shade_entry(results_window_menu, RESULTS_MENU_ADD_TO_HOTLIST, hotlist_add_window_is_open() || file_get_dialogue(handle->file) == NULL);
-	menus_shade_entry(results_window_menu, RESULTS_MENU_STOP_SEARCH, !file_search_active(handle->file));
-
-	menus_tick_entry(results_window_menu_display, RESULTS_MENU_DISPLAY_PATH_ONLY, !handle->full_info);
-	menus_tick_entry(results_window_menu_display, RESULTS_MENU_DISPLAY_FULL_INFO, handle->full_info);
-
-	saveas_initialise_dialogue(results_save_results, NULL, "FileName", NULL, TRUE, FALSE, handle);
-	saveas_initialise_dialogue(results_save_paths, NULL, "ExptName", "SelectName", handle->selection_count > 0, handle->selection_count > 0, handle);
-	saveas_initialise_dialogue(results_save_options, NULL, "SrchName", NULL, FALSE, FALSE, handle);*/
+	menus_shade_entry(list_window_menu, LIST_MENU_WRITE_SELECTED, list_selection_count == 0);
 }
 
 
@@ -501,6 +491,10 @@ static void list_menu_selection(wimp_w w, wimp_menu *menu, wimp_selection *selec
 //			break;
 //		}
 //		break;
+
+	case LIST_MENU_WRITE_SELECTED:
+		list_write_selected_files();
+		break;
 
 	case LIST_MENU_SELECT_ALL:
 		list_select_all();
@@ -1125,4 +1119,22 @@ static void list_select_none(void)
 	}
 
 	list_selection_count = 0;
+}
+
+static void list_write_selected_files(void)
+{
+	int	i;
+
+	if (list_selection_count == 0)
+		return;
+
+	paper_ensure_ps2_file_folder();
+
+	for (i = 0; i < list_index_count; i++) {
+		if ((list_index[i].type == LIST_LINE_TYPE_PAPER) && (list_index[i].flags & LIST_LINE_FLAGS_SELECTED)) {
+			paper_write_file(list_index[i].index);
+		}
+	}
+
+	paper_read_definitions();
 }

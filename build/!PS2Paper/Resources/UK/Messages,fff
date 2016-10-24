@@ -53,6 +53,9 @@ BadTemplate:Window template '%0' not found.
 PaperNoMem:There was not enough memory to create the paper list.
 ColNoMem:There was not enough memory to create the list window columns.
 
+Overwrite:The %0 file exists and the contents isn't recognised by PS2Paper. Do you wish to overwrite it?
+OverwriteB:Overwrite,Cancel
+
 # Interactive Help for windows and icons.
 #
 # Window icon data (particularly toolbar items) may be in menu data when duplicates exist.
@@ -80,6 +83,7 @@ Help.IconBarMenu.00:\Rsee information about PS2Paper.
 Help.IconBarMenu.01:\Sread the online manual.
 Help.IconBarMenu.02:\Squit PS2Paper.
 
-Help.ListMenu.00:\Sselect all of the paper definitions.
-Help.ListMenu.01:\Sclear the current selection.
-Help.ListTB.Refresh/Help.ListMenu.02:\Srefresh the details of the paper definitions.
+Help.ListMenu.00:\Swrite new PS2 dimension files back to disc for the selected items.
+Help.ListMenu.01:\Sselect all of the paper definitions.
+Help.ListMenu.02:\Sclear the current selection.
+Help.ListTB.Refresh/Help.ListMenu.03:\Srefresh the details of the paper definitions.

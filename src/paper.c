@@ -76,7 +76,6 @@ static void			paper_clear_definitions(void);
 static osbool			paper_allocate_definition_space(unsigned new_allocation);
 static osbool			paper_read_def_file(char *file, enum paper_source source);
 static void			paper_scan_sizes(void);
-static osbool			paper_update_files(void);
 static enum paper_file_status	paper_read_pagesize(struct paper_size *paper, char *file);
 static osbool			paper_write_pagesize(struct paper_size *paper, char *file_path);
 
@@ -139,6 +138,22 @@ void paper_launch_file(int definition)
 	if (error != NULL)
 		error_report_os_error(error, wimp_ERROR_BOX_OK_ICON);
 }
+
+void paper_write_file(int definition)
+{
+	if (definition < 0 || definition >= paper_count || paper_sizes[definition].ps2_file_status == PAPER_FILE_STATUS_CORRECT)
+		return;
+
+	if (paper_sizes[definition].ps2_file_status == PAPER_FILE_STATUS_UNKNOWN &&
+			error_msgs_param_report_question("Overwrite", "OverwriteB", paper_sizes[definition].ps2_file, NULL, NULL, NULL) == 2)
+		return;
+
+	paper_write_pagesize(paper_sizes + definition, "<Choices$Write>.Printers.ps.Paper");
+
+	return;
+}
+
+
 
 /**
  * Clear the paper definitions and release the memory used to hold them.
@@ -337,43 +352,6 @@ static void paper_scan_sizes(void)
 	}
 }
 
-static osbool paper_update_files(void)
-{
-	struct paper_size	*paper;
-	int			var_len;
-	char			file_path[1024];
-
-
-	*file_path = '\0';
-
-	os_read_var_val_size("Choices$Write", 0, os_VARTYPE_STRING, &var_len, NULL);
-
-	if (var_len == 0)
-		return FALSE;
-
-	snprintf(file_path, sizeof(file_path), "<Choices$Write>.Printers");
-	if (osfile_read_no_path(file_path, NULL, NULL, NULL, NULL) == fileswitch_NOT_FOUND)
-		osfile_create_dir(file_path, 0);
-
-	snprintf(file_path, sizeof(file_path), "<Choices$Write>.Printers.ps");
-	if (osfile_read_no_path(file_path, NULL, NULL, NULL, NULL) == fileswitch_NOT_FOUND)
-		osfile_create_dir(file_path, 0);
-
-	snprintf(file_path, sizeof(file_path), "<Choices$Write>.Printers.ps.Paper");
-	if (osfile_read_no_path(file_path, NULL, NULL, NULL, NULL) == fileswitch_NOT_FOUND)
-		osfile_create_dir(file_path, 0);
-
-//	paper = paper_sizes;
-
-//	while (paper != NULL) {
-//		if (paper->ps2_file_status == PAPER_FILE_STATUS_MISSING || paper->ps2_file_status == PAPER_FILE_STATUS_INCORRECT)
-//			paper_write_pagesize(paper, file_path);
-
-//		paper = paper->next;
-//	}
-
-	return TRUE;
-}
 
 static enum paper_file_status paper_read_pagesize(struct paper_size *paper, char *file)
 {
@@ -393,7 +371,7 @@ static enum paper_file_status paper_read_pagesize(struct paper_size *paper, char
 		return PAPER_FILE_STATUS_UNKNOWN;
 	}
 
-	if (strcmp(line, "% Created by PrintPDF\n") != 0) {
+	if (strcmp(line, "% Created by PS2Paper\n") != 0) {
 		fclose(in);
 		return PAPER_FILE_STATUS_UNKNOWN;
 	}
@@ -418,6 +396,45 @@ static enum paper_file_status paper_read_pagesize(struct paper_size *paper, char
 	return PAPER_FILE_STATUS_CORRECT;
 }
 
+
+/**
+ * Ensure that the Paper folder exists on Choices$Write, ready for writing
+ * PS2 files to.
+ *
+ * \return			TRUE if successful; FALSE on failure.
+ */
+
+osbool paper_ensure_ps2_file_folder(void)
+{
+	int			var_len;
+	char			file_path[PAPER_MAX_LINE_LEN];
+
+
+	*file_path = '\0';
+
+	os_read_var_val_size("Choices$Write", 0, os_VARTYPE_STRING, &var_len, NULL);
+
+	if (var_len == 0)
+		return FALSE;
+
+	snprintf(file_path, PAPER_MAX_LINE_LEN, "<Choices$Write>.Printers");
+	file_path[PAPER_MAX_LINE_LEN - 1] = '\0';
+	if (osfile_read_no_path(file_path, NULL, NULL, NULL, NULL) == fileswitch_NOT_FOUND)
+		osfile_create_dir(file_path, 0);
+
+	snprintf(file_path, PAPER_MAX_LINE_LEN, "<Choices$Write>.Printers.ps");
+	file_path[PAPER_MAX_LINE_LEN - 1] = '\0';
+	if (osfile_read_no_path(file_path, NULL, NULL, NULL, NULL) == fileswitch_NOT_FOUND)
+		osfile_create_dir(file_path, 0);
+
+	snprintf(file_path, PAPER_MAX_LINE_LEN, "<Choices$Write>.Printers.ps.Paper");
+	file_path[PAPER_MAX_LINE_LEN - 1] = '\0';
+	if (osfile_read_no_path(file_path, NULL, NULL, NULL, NULL) == fileswitch_NOT_FOUND)
+		osfile_create_dir(file_path, 0);
+
+	return TRUE;
+}
+
 static osbool paper_write_pagesize(struct paper_size *paper, char *file_path)
 {
 	FILE	*out;
@@ -432,7 +449,7 @@ static osbool paper_write_pagesize(struct paper_size *paper, char *file_path)
 	if (out == NULL)
 		return FALSE;
 
-	fprintf(out, "%% Created by PrintPDF\n");
+	fprintf(out, "%% Created by PS2Paper\n");
 	fprintf(out, "%%%%BeginFeature: PageSize %s\n", paper->name);
 	fprintf(out, "<< /PageSize [ %.3f %.3f ] >> setpagedevice\n", (double) paper->width / 1000.0, (double) paper->height / 1000.0);
 	fprintf(out, "%%%%EndFeature\n");

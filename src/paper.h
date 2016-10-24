@@ -105,4 +105,16 @@ struct paper_size *paper_get_definitions(void);
 
 void paper_launch_file(int definition);
 
+void paper_write_file(int definition);
+
+
+/**
+ * Ensure that the Paper folder exists on Choices$Write, ready for writing
+ * PS2 files to.
+ *
+ * \return			TRUE if successful; FALSE on failure.
+ */
+
+osbool paper_ensure_ps2_file_folder(void);
+
 #endif

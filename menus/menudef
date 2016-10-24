@@ -42,6 +42,9 @@ menu(IconBarMenu, "PS2 Paper")
 
 menu(ListWindowMenu, "PS2 Paper")
 {
+	item("Write files") {
+		dotted;
+	}
 	item("Select all");
 	item("Clear selection") {
 		dotted;
