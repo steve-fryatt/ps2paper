@@ -46,7 +46,6 @@
 
 /* SF-Lib header files. */
 
-#include "sflib/debug.h"
 #include "sflib/errors.h"
 #include "sflib/string.h"
 
@@ -191,14 +190,10 @@ static osbool paper_allocate_definition_space(unsigned new_allocation)
 
 	new_allocation = ((new_allocation / PAPER_STORAGE_ALLOCATION) + 1) * PAPER_STORAGE_ALLOCATION;
 
-	debug_printf("Requesting new allocation of %d spaces", new_allocation);
-
 	if (flex_extend((flex_ptr) &paper_sizes, new_allocation * sizeof(struct paper_size)) == 0)
 		return FALSE;
 
 	paper_allocation = new_allocation;
-
-	debug_printf("Allocation successful");
 
 	return TRUE;
 }
@@ -255,8 +250,6 @@ static osbool paper_read_def_file(char *file, enum paper_source source)
 		}
 
 		if (paper_name != '\0' && paper_width != 0 && paper_height != 0) {
-			debug_printf("Found paper definition: %s, %d x %d", paper_name, paper_width, paper_height);
-
 			paper_allocate_definition_space(paper_count + 1);
 
 			if (paper_count < paper_allocation) {
