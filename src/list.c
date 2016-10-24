@@ -808,7 +808,7 @@ void list_rescan_paper_definitions(void)
 
 	visible_extent = state.yscroll + (state.visible.y0 - state.visible.y1);
 
-	new_extent = -((LIST_ICON_HEIGHT * index_size) + LIST_TOOLBAR_HEIGHT);
+	new_extent = -((LIST_LINE_HEIGHT * index_size) + LIST_TOOLBAR_HEIGHT + (2 * LIST_WINDOW_MARGIN));
 
 	if (new_extent > (state.visible.y0 - state.visible.y1))
 		new_extent = state.visible.y0 - state.visible.y1;
