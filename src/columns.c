@@ -177,9 +177,25 @@ void columns_adjust_icons(struct columns_block *handle)
 
 
 /**
+ * Get the full width of a column instance.
+ *
+ * \param *handle		The handle of the column instance to interrogate.
+ * \return			The width of the set of columns, in OS units.
+ */
+
+int columns_get_full_width(struct columns_block *handle)
+{
+	if (handle == NULL)
+		return 0;
+
+	return handle->column_locations[handle->column_count - 1] + handle->columns[handle->column_count - 1].width;
+}
+
+
+/**
  * Identify which column the supplied X coordinate falls into.
  * 
- * \param *handle		The handle of the column instance to update.
+ * \param *handle		The handle of the column instance to interrogate.
  * \param xpos			The X position within the window.
  * \return			The identified column number, or -1.
  */

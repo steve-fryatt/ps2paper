@@ -216,28 +216,47 @@ static void list_select_none(void);
 
 void list_initialise(osspriteop_area *sprites)
 {
+	int		width;
 	os_error	*error;
-	int		icon;
+
+	/* Set up the List Window menu definition. */
 
 	list_window_menu = templates_get_menu("ListWindowMenu");
 	ihelp_add_menu(list_window_menu, "ListMenu");
 
-	list_window_def = templates_load_window("Paper");
-	list_pane_def = templates_load_window("PaperTB");
+	/* Load the List Window and List Window Pane definitions. */
 
+	list_window_def = templates_load_window("Paper");
 	list_window_def->sprite_area = sprites;
 	list_window_def->icon_count = 0;
+
+	list_pane_def = templates_load_window("PaperTB");
 	list_pane_def->sprite_area = sprites;
 
-	list_display_units = LIST_UNITS_MM;
-
-	windows_place_as_toolbar(list_window_def, list_pane_def, LIST_TOOLBAR_HEIGHT - 4);
+	/* Initialise the window columns, and adjust the icons to match. */
 
 	list_columns = columns_create_window(list_window_def, list_pane_def, list_column_definitions, LIST_COLUMN_COUNT);
 	if (list_columns == NULL)
 		error_msgs_report_fatal("ColNoMem");
 
 	columns_adjust_icons(list_columns);
+
+	/* Set the main window width to match the defined columns. */
+
+	width = columns_get_full_width(list_columns);
+	list_window_def->extent.x1 = width - list_window_def->extent.x0;
+	list_window_def->visible.x1 = width + list_window_def->visible.x0;
+
+	/* Position the toolbar pane to fit. */
+
+	windows_place_as_toolbar(list_window_def, list_pane_def, LIST_TOOLBAR_HEIGHT - 4);
+
+	/* Set the left- and right-hand edges of the section icon to suit the window size. */
+
+	list_window_def->icons[LIST_SEPARATOR_ICON].extent.x0 = list_window_def->extent.x0;
+	list_window_def->icons[LIST_SEPARATOR_ICON].extent.x1 = list_window_def->extent.x1;
+
+	/* Create the two windows and register them with Interactive Help. */
 
 	error = xwimp_create_window(list_window_def, &list_window);
 	if (error != NULL) {
@@ -254,6 +273,8 @@ void list_initialise(osspriteop_area *sprites)
 	ihelp_add_window(list_window, "List", list_decode_window_help);
 	ihelp_add_window(list_pane, "ListTB", NULL);
 
+	/* Set up the window event handlers. */
+
 	event_add_window_menu(list_window, list_window_menu);
 	event_add_window_redraw_event(list_window, list_redraw_handler);
 	event_add_window_mouse_event(list_window, list_click_handler);
@@ -261,7 +282,6 @@ void list_initialise(osspriteop_area *sprites)
 //	event_add_window_menu_warning(list_window, list_menu_warning);
 	event_add_window_menu_selection(list_window, list_menu_selection);
 	event_add_window_menu_close(list_window, list_menu_close);
-
 
 	event_add_window_menu(list_pane, list_window_menu);
 	event_add_window_mouse_event(list_pane, list_toolbar_click_handler);
@@ -276,10 +296,9 @@ void list_initialise(osspriteop_area *sprites)
 
 	icons_set_radio_group_selected(list_pane, list_display_units, 3, LIST_MM_ICON, LIST_INCH_ICON, LIST_POINT_ICON);
 
-	/* Set the left- and right-hand edges of the section icon to suit the window size. */
+	/* Default the display units to millimeters. */
 
-	list_window_def->icons[LIST_SEPARATOR_ICON].extent.x0 = list_window_def->extent.x0;
-	list_window_def->icons[LIST_SEPARATOR_ICON].extent.x1 = list_window_def->extent.x1;
+	list_display_units = LIST_UNITS_MM;
 
 	/* Allocate a token amount of memory to initialise the flex block. */
 
