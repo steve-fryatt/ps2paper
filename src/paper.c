@@ -76,7 +76,7 @@ static void			paper_clear_definitions(void);
 static osbool			paper_allocate_definition_space(unsigned new_allocation);
 static osbool			paper_read_def_file(char *file, enum paper_source source);
 static osbool			paper_update_files(void);
-static enum paper_status	paper_read_pagesize(struct paper_size *paper, char *file);
+static enum paper_file_status	paper_read_pagesize(struct paper_size *paper, char *file);
 static osbool			paper_write_pagesize(struct paper_size *paper, char *file_path);
 
 
@@ -127,7 +127,7 @@ void paper_launch_file(int definition)
 	char		buffer[PAPER_MAX_LINE_LEN];
 	os_error	*error;
 
-	if (definition < 0 || definition >= paper_count || paper_sizes[definition].ps2_file_status == PAPER_STATUS_MISSING)
+	if (definition < 0 || definition >= paper_count || paper_sizes[definition].ps2_file_status == PAPER_FILE_STATUS_MISSING)
 		return;
 
 	snprintf(buffer, PAPER_MAX_LINE_LEN, "%%Filer_Run -Shift Printers:ps.Paper.%s", paper_sizes[definition].ps2_file);
@@ -248,12 +248,13 @@ static osbool paper_read_def_file(char *file, enum paper_source source)
 				paper_definition->source = source;
 				paper_definition->width = paper_width;
 				paper_definition->height = paper_height;
+				paper_definition->size_status = PAPER_SIZE_STATUS_UNKNOWN;
 
 				for (i = 0; i < PAPER_FILE_LEN && paper_name[i] != '\0' && paper_name[i] != ' '; i++)
 					paper_definition->ps2_file[i] = paper_name[i];
 
 				paper_definition->ps2_file[i] = '\0';
-				paper_definition->ps2_file_status = PAPER_STATUS_MISSING;
+				paper_definition->ps2_file_status = PAPER_FILE_STATUS_MISSING;
 
 				string_tolower(paper_definition->ps2_file);
 
@@ -309,7 +310,7 @@ static osbool paper_update_files(void)
 //	paper = paper_sizes;
 
 //	while (paper != NULL) {
-//		if (paper->ps2_file_status == PAPER_STATUS_MISSING || paper->ps2_file_status == PAPER_STATUS_INCORRECT)
+//		if (paper->ps2_file_status == PAPER_FILE_STATUS_MISSING || paper->ps2_file_status == PAPER_FILE_STATUS_INCORRECT)
 //			paper_write_pagesize(paper, file_path);
 
 //		paper = paper->next;
@@ -318,37 +319,37 @@ static osbool paper_update_files(void)
 	return TRUE;
 }
 
-static enum paper_status paper_read_pagesize(struct paper_size *paper, char *file)
+static enum paper_file_status paper_read_pagesize(struct paper_size *paper, char *file)
 {
 	FILE	*in;
 	char	line[1024];
 	double	width, height;
 
 	if (file == NULL)
-		return PAPER_STATUS_UNKNOWN;
+		return PAPER_FILE_STATUS_UNKNOWN;
 
 	in = fopen(file, "r");
 	if (in == NULL)
-		return PAPER_STATUS_UNKNOWN;
+		return PAPER_FILE_STATUS_UNKNOWN;
 
 	if (fgets(line, sizeof(line), in) == NULL) {
 		fclose(in);
-		return PAPER_STATUS_UNKNOWN;
+		return PAPER_FILE_STATUS_UNKNOWN;
 	}
 
 	if (strcmp(line, "% Created by PrintPDF\n") != 0) {
 		fclose(in);
-		return PAPER_STATUS_UNKNOWN;
+		return PAPER_FILE_STATUS_UNKNOWN;
 	}
 
 	if (fgets(line, sizeof(line), in) == NULL) {
 		fclose(in);
-		return PAPER_STATUS_UNKNOWN;
+		return PAPER_FILE_STATUS_UNKNOWN;
 	}
 
 	if (fgets(line, sizeof(line), in) == NULL) {
 		fclose(in);
-		return PAPER_STATUS_UNKNOWN;
+		return PAPER_FILE_STATUS_UNKNOWN;
 	}
 
 	sscanf(line, "<< /PageSize [ %lf %lf ] >> setpagedevice \n", &width, &height);
@@ -356,9 +357,9 @@ static enum paper_status paper_read_pagesize(struct paper_size *paper, char *fil
 	fclose(in);
 
 	if (width * 1000.0 != paper->width || height * 1000.0 != paper->height)
-		return PAPER_STATUS_INCORRECT;
+		return PAPER_FILE_STATUS_INCORRECT;
 
-	return PAPER_STATUS_CORRECT;
+	return PAPER_FILE_STATUS_CORRECT;
 }
 
 static osbool paper_write_pagesize(struct paper_size *paper, char *file_path)

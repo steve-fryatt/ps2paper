@@ -699,23 +699,20 @@ static void list_redraw_handler(wimp_draw *redraw)
 				icon[LIST_SIZE_ICON].extent.y0 = LINE_Y0(y);
 				icon[LIST_SIZE_ICON].extent.y1 = LINE_Y1(y);
 
-	//			switch(paper[list_index[y].index].ps2_file_status) {
-	//			case PAPER_STATUS_MISSING:
-	//				token = "PaperStatMiss";
-	//				break;
-	//			case PAPER_STATUS_UNKNOWN:
+				switch(paper[list_index[y].index].size_status) {
+				case PAPER_SIZE_STATUS_UNKNOWN:
 					token = "SizeStatUnkn";
-	//				break;
-	//			case PAPER_STATUS_CORRECT:
-	//				token = "SizeStatOK";
-	//				break;
-	//			case PAPER_STATUS_INCORRECT:
-	//				token = "SizeStatAmb";
-	//				break;
-	//			default:
-	//				token = "";
-	//				break;
-	//			}
+					break;
+				case PAPER_SIZE_STATUS_OK:
+					token = "SizeStatOK";
+					break;
+				case PAPER_SIZE_STATUS_AMBIGUOUS:
+					token = "SizeStatAmb";
+					break;
+				default:
+					token = "";
+					break;
+				}
 
 				msgs_lookup(token, buffer, LIST_ICON_BUFFER_LEN);
 				buffer[LIST_ICON_BUFFER_LEN - 1] = '\0';
@@ -729,7 +726,7 @@ static void list_redraw_handler(wimp_draw *redraw)
 				icon[LIST_FILENAME_ICON].data.indirected_text_and_sprite.text = paper[list_index[y].index].ps2_file;
 				icon[LIST_FILENAME_ICON].data.indirected_text_and_sprite.size = PAPER_FILE_LEN;
 
-				if (paper[list_index[y].index].ps2_file_status == PAPER_STATUS_MISSING)
+				if (paper[list_index[y].index].ps2_file_status == PAPER_FILE_STATUS_MISSING)
 					icon[LIST_FILENAME_ICON].flags |= wimp_ICON_SHADED;
 				else
 					icon[LIST_FILENAME_ICON].flags &= ~wimp_ICON_SHADED;
@@ -742,16 +739,16 @@ static void list_redraw_handler(wimp_draw *redraw)
 				icon[LIST_STATUS_ICON].extent.y1 = LINE_Y1(y);
 
 				switch(paper[list_index[y].index].ps2_file_status) {
-				case PAPER_STATUS_MISSING:
+				case PAPER_FILE_STATUS_MISSING:
 					token = "PaperStatMiss";
 					break;
-				case PAPER_STATUS_UNKNOWN:
+				case PAPER_FILE_STATUS_UNKNOWN:
 					token = "PaperStatUnkn";
 					break;
-				case PAPER_STATUS_CORRECT:
+				case PAPER_FILE_STATUS_CORRECT:
 					token = "PaperStatOK";
 					break;
-				case PAPER_STATUS_INCORRECT:
+				case PAPER_FILE_STATUS_INCORRECT:
 					token = "PaperStatNOK";
 					break;
 				default:

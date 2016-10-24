@@ -65,8 +65,9 @@ Help.ProgInfo.Website:\Svisit the PS2Paper website, if you have Internet access.
 Help.List.Col0:\Tname of the paper.
 Help.List.Col1:\Twidth of the paper, as given in the definition.
 Help.List.Col2:\Theight of the paper, as given in the definition.
-Help.List.Col3:\Tfile which can be used to insert the paper dimensions into the Postscript stream.|MDouble-click \s to run the file (hold Shift to open it in an editor).
-Help.List.Col4:\Tstatus of the Postscript file.
+Help.List.Col3:\Tstatus of the paper size, referring to whether there is a clash with another definition using an ambiguous paper name.
+Help.List.Col4:\Tfile which can be used to insert the paper dimensions into the Postscript stream.|MDouble-click \s to run the file (hold Shift to open it in an editor).
+Help.List.Col5:\Tstatus of the Postscript file.
 Help.List.Separator:\Tstart of a new set of paper definitions.
 
 Help.ListTB.Select:\Sselect all of the paper definitions.|m\Aclear the current selection.

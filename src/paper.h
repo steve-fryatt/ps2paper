@@ -54,14 +54,24 @@ enum paper_source {
 };
 
 /**
+ * The possible statuses for a paper size.
+ */
+
+enum paper_size_status {
+	PAPER_SIZE_STATUS_UNKNOWN,				/**< The size hasn't yet been scanned.				*/
+	PAPER_SIZE_STATUS_OK,					/**< The paper size is OK, and doesn't clash with any others.	*/
+	PAPER_SIZE_STATUS_AMBIGUOUS				/**< The paper sise clashes with others of the same name.	*/
+};
+
+/**
  * The possible statuses for a paper definition.
  */
 
-enum paper_status {
-	PAPER_STATUS_MISSING,					/**< There is no file for the paper size.			*/
-	PAPER_STATUS_UNKNOWN,					/**< There is a file, but it's not one of ours.			*/
-	PAPER_STATUS_CORRECT,					/**< There is a file, and it matches the paper.			*/
-	PAPER_STATUS_INCORRECT					/**< There is a file, but the size is wrong.			*/
+enum paper_file_status {
+	PAPER_FILE_STATUS_MISSING,				/**< There is no file for the paper size.			*/
+	PAPER_FILE_STATUS_UNKNOWN,				/**< There is a file, but it's not one of ours.			*/
+	PAPER_FILE_STATUS_CORRECT,				/**< There is a file, and it matches the paper.			*/
+	PAPER_FILE_STATUS_INCORRECT				/**< There is a file, but the size is wrong.			*/
 };
 
 
@@ -69,9 +79,10 @@ struct paper_size {
 	char			name[PAPER_NAME_LEN];		/**< The Printers name for the paper				*/
 	int			width;				/**< The Printers width of the paper				*/
 	int			height;				/**< The Printers height of the paper				*/
+	enum paper_size_status	size_status;			/**< The status of the paper size				*/
 	enum paper_source	source;				/**< The name of the source file				*/
 	char			ps2_file[PAPER_FILE_LEN];	/**< The associated PS2 Paper file, or ""			*/
-	enum paper_status	ps2_file_status;		/**< Indicate the status of the Paper File.			*/
+	enum paper_file_status	ps2_file_status;		/**< Indicate the status of the Paper File.			*/
 };
 
 /**
