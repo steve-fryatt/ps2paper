@@ -567,10 +567,10 @@ static void list_menu_close(wimp_w w, wimp_menu *menu)
 static void list_redraw_handler(wimp_draw *redraw)
 {
 	struct paper_size	*paper;
-	int			ox, oy, top, bottom, y;
+	int			oy, top, bottom, y;
 	osbool			more;
 	wimp_icon		*icon;
-	char			buffer[LIST_ICON_BUFFER_LEN], validation[255], *unit_format, *token;
+	char			buffer[LIST_ICON_BUFFER_LEN], *unit_format, *token;
 	double			unit_scale;
 
 	/* ** This is a pointer to a flex block. If anything is done to make the
@@ -620,7 +620,6 @@ static void list_redraw_handler(wimp_draw *redraw)
 
 	more = wimp_redraw_window(redraw);
 
-	ox = redraw->box.x0 - redraw->xscroll;
 	oy = redraw->box.y1 - redraw->yscroll;
 
 	while (more) {
