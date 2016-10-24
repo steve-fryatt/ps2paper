@@ -75,6 +75,7 @@ static size_t			paper_count = 0;		/**< Number of defined paper sizes.				*/
 static void			paper_clear_definitions(void);
 static osbool			paper_allocate_definition_space(unsigned new_allocation);
 static osbool			paper_read_def_file(char *file, enum paper_source source);
+static void			paper_scan_sizes(void);
 static osbool			paper_update_files(void);
 static enum paper_file_status	paper_read_pagesize(struct paper_size *paper, char *file);
 static osbool			paper_write_pagesize(struct paper_size *paper, char *file_path);
@@ -107,6 +108,8 @@ void paper_read_definitions(void)
 	paper_read_def_file("Printers:PaperRO", PAPER_SOURCE_MASTER);
 	paper_read_def_file("PrinterChoices:PaperRW", PAPER_SOURCE_USER);
 	paper_read_def_file("Printers:ps.Resources.PaperRO", PAPER_SOURCE_DEVICE);
+
+	paper_scan_sizes();
 
 	list_rescan_paper_definitions();
 }
@@ -279,6 +282,59 @@ static osbool paper_read_def_file(char *file, enum paper_source source)
 	fclose(in);
 
 	return TRUE;
+}
+
+
+/**
+ * Run a scan of the paper definitions to set up the paper size status values.
+ */
+
+static void paper_scan_sizes(void)
+{
+	int	paper, test;
+	osbool	ambiguous;
+
+	if (paper_sizes == NULL)
+		return;
+
+	for (paper = 0; paper < paper_count; paper++) {
+		/* Has this paper already been tested in an earlier scan? */
+
+		if (paper_sizes[paper].size_status != PAPER_SIZE_STATUS_UNKNOWN)
+			continue;
+
+		/* Scan through the remaining paper definitions to check for matching PS2 filenames. */
+
+		ambiguous = FALSE;
+
+		for (test = paper + 1; test < paper_count; test++) {
+			/* Do the PS2 filenames match or not? */
+
+			if (strcmp(paper_sizes[paper].ps2_file, paper_sizes[test].ps2_file) != 0)
+				continue;
+
+			/* If they do, do the paper sizes agree or not? */
+
+			if (paper_sizes[paper].width == paper_sizes[test].width && paper_sizes[paper].height == paper_sizes[test].height)
+				continue;
+
+			/* If they don't, the same filename is being used for different sizes of paper. */
+
+			ambiguous = TRUE;
+			break;
+		}
+
+		/* Update the status of this paper definition. */
+
+		paper_sizes[paper].size_status = (ambiguous) ? PAPER_SIZE_STATUS_AMBIGUOUS : PAPER_SIZE_STATUS_OK;
+
+		/* Update the status of any other definitions using the same PS2 filename. */
+
+		for (test = paper + 1; test < paper_count; test++) {
+			if (strcmp(paper_sizes[paper].ps2_file, paper_sizes[test].ps2_file) == 0)
+				paper_sizes[test].size_status = (ambiguous) ? PAPER_SIZE_STATUS_AMBIGUOUS : PAPER_SIZE_STATUS_OK;
+		}
+	}
 }
 
 static osbool paper_update_files(void)
