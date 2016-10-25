@@ -113,7 +113,7 @@
 /* The column numbers. */
 
 #define LIST_COLUMN_PAPER_NAME 0
-#define LIST_COLUMN_PAPER_FILE 3
+#define LIST_COLUMN_PAPER_FILE 4
 
 /* The column definitions. */
 
