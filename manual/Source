@@ -20,11 +20,8 @@ Version $$version$$ ($$date$$)†
 #Indent 2
 #Table Columns 4
 è <Introduction>
-è <Installing ProcText=>Install>
-è <Using ProcText=>Use>
-è <Writing Script Files=>Scripts>
-è <Using the Queue=>Queue>
-è <Setting Choices=>Choices>
+è <Installing PS2Paper=>Install>
+è <Using PS2Paper=>Use>
 è <Version History=>History>
 #Endtable
 #Indent
@@ -104,36 +101,46 @@ The necessary libraries and build tools can be found at <link ref="#url http://w
 
 <chapter title="Introduction" file="Introduction">
 
-<cite>ProcText</cite> provides versatile and configurable text processing and manipulation facilities, based on a set of pre-programmed actions and a user-configurable search and replace facility.
+<cite>PS2Paper</cite> is a utility to help manage the different paper sizes configured for the Acorn Level&nbsp;2 PostScript printer driver supplied with RISC&nbsp;OS. Note that <cite>PS2Paper</cite> is <strong>not</strong> required when using the Level&nbsp;3 PostScript driver from John Tytgat and Martin Wuerthner.
 
-In addition to this manual, interactive help is fully supported.
+Perhaps surprisingly for a printer driver, the Level&nbsp;2 PostScript driver does not directly use the paper dimensions defined in <cite>Printers</cite>. Instead, it uses the <em>name</em> of the paper to help identify a snippet of PostScript data held in a small file inside <file>!Printers</file> (or the user&rsquo;s choices inside <file>!Boot</file>), and includes this in a suitable place in the PostScript data being output. If this snippet contains the page dimensions, these then get passed on to whatever subsequently reads the PostScript output.
 
-</chapter>
+The purpose of <cite>PS2Paper</cite> is to help keep track of the different papers defined on your system and the corresponding PostScript snippets &ndash; and to help ensure that the sizes given in those snippets actually match the sizes given for the associated paper definitions.
 
-
-
-
-<chapter title="Installing ProcText" file="Install">
-
-To install <cite>ProcText</cite>, drag the <file>!ProcText</file> application directory from the archive to a suitable location on your hard disc. Once copied, <cite>ProcText</cite> can be started by double-clicking in the usual way.
-
-<cite>ProcText</cite> is 32-bit neutral, and requires the 32-bit Shared C Library from Castle to be installed.  If you do not have this, it can be obtained from <link ref="#url http://www.iyonix.com/32bit/system.shtml">http://www.iyonix.com/32bit/system.shtml</link> with full installation instructions.
+In addition to this manual, interactive help is fully supported by the application.
 
 </chapter>
 
 
 
-<chapter title="Using ProcText" file="Use">
 
-Once installed on disc, <cite>ProcText</cite> can be started in the usual way by double-clicking on its application directory to place a copy on the iconbar.
+<chapter title="Installing PS2Paper" file="Install">
 
+To install <cite>PS2Paper</cite>, drag the <file>!PS2Paper</file> application directory from the archive to a suitable location on your hard disc. Once copied, <cite>PS2Paper</cite> can be started by double-clicking in the usual way.
+
+<cite>PS2Paper</cite> is 32-bit neutral, and requires the 32-bit Shared C Library from Castle to be installed.  If you do not have this, it can be obtained from <link ref="#url http://www.iyonix.com/32bit/system.shtml">http://www.iyonix.com/32bit/system.shtml</link> with full installation instructions.
 
 </chapter>
 
 
 
-<chapter title="Writing Script Files" file="Scripts">
+<chapter title="Using PS2Paper" file="Use">
 
+Once installed on disc, <cite>PS2Paper</cite> can be started in the usual way by double-clicking on its application directory to place a copy on the iconbar. Once on the iconbar, a <mouse>select</mouse> click on its icon will scan the paper sizes on the system and then open the paper window.
+
+The window shows a list of the paper sizes available to the PostScript Level&nbsp;2 printer driver, grouped into the three sections that they are held in within Printers. Although these all appear in the dialogue which opens when selecting <menu>Edit paper sizes...</menu> from the <cite>Printers</cite> iconbar menu, the fact that there are three distinct places which hold paper definitions explains why it&rsquo;s possible to have more than one paper size with the same name.
+
+Each row shows the width and height of the paper, in either millimetres, inches or points (as selected from the toolbar). Note that this is the overall paper dimension, before any margins are applied. To the right of these <icon>Width</icon> and <icon>Height</icon> columns is the <icon>Size</icon> column, which shows either &lsquo;OK&rsquo; or &lsquo;Ambiguous&rsquo; &ndash; we will come on to this soon.
+
+The <icon>File Name</icon> column shows the name of the PostScript snippet file associated with the paper. The name of the file is derived from the name of the paper associated with it, converted to lower case and truncated at the first space. As a result, a paper definition named &lsquo;A4&rsquo; would have a snippet file called <file>a4</file> &ndash; but then, so would a paper size with the name &lsquo;A4&nbsp;Paper&rsquo; or even &lsquo;A4&nbsp;(Generic&nbsp;PS)&rsquo;.
+
+There&rsquo;s clearly a risk that with this ambiguity in file names, two or more paper definitions could both resolve to the same name for the snippet file. If all of the affected paper sizes are the same, the <icon>Size</icon> column shows &lsquo;OK&lsquo;, but if any of them are different they <em>all</em> show &lsquo;Ambiguous&rsquo;.
+
+Finally, the <icon>Status</icon> column shows what <cite>PS2Paper</cite> can make of the snippet file and its contents. If there is no file of the given name on the system, the file icon is greyed out and the status shows as &lsquo;Missing&rsquo;; if there is a file, but it wasn&rsquo;t created by <cite>PS2Paper</cite>, the column shows &lsquo;Unknown&rsquo;. Otherwise, the column shows &lsquo;Correct&rsquo; if the snippet contains the same dimensions as shown in the <icon>Width</icon> and <icon>Height</icon> columns, or &lsquo;Incorrect&rsquo; if there&rsquo;s a discrepancy.
+
+Double-clicking on a file icon in the <icon>File Name</icon> column will run it in the usual way: hold down <key>shift</key> to load a snippet into a text editor for inspection.
+
+The different paper definitions can be selected by clicking <mouse>select</mouse> or <mouse>adjust</mouse> on the items in the <icon>Paper Name</icon> column. To update the contents of the PostScript snippet files for the selected papers so that they contain the correct paper dimensions (or create new ones if the files don&rsquo;t exist), choose <menu>Write files</menu> from the menu.
 
 </chapter>
 
@@ -141,7 +148,7 @@ Once installed on disc, <cite>ProcText</cite> can be started in the usual way by
 
 <chapter title="Version History" file="History">
 
-Here is a list of the versions of <cite>ProcText</cite>, along with all the changes made.
+Here is a list of the versions of <cite>PS2Paper</cite>, along with all the changes made.
 
 
 <subhead title="Test Build">
