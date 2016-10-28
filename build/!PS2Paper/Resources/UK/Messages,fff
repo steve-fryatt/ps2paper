@@ -93,4 +93,8 @@ Help.ListMenu.0000:\Swrite new PS2 dimension files back to disc for the selected
 Help.ListMenu.0001:\Srun the selected snippet files (hold Shift to open them in an editor).
 Help.ListMenu.01:\Sselect all of the paper definitions.
 Help.ListMenu.02:\Sclear the current selection.
-Help.ListTB.Refresh/Help.ListMenu.03:\Srefresh the details of the paper definitions.
+Help.ListMenu.03:\Rchange the units used for the page dimensions.
+Help.ListTB.Millimetres/Help.ListMenu.0300:\Sview the page dimensions in millimetres.
+Help.ListTB.Inches/Help.ListMenu.0301:\Sview the page dimensions in inches.
+Help.ListTB.Points/Help.ListMenu.0302:\Sview the page dimensions in points.
+Help.ListTB.Refresh/Help.ListMenu.04:\Srefresh the details of the paper definitions.

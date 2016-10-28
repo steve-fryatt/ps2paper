@@ -53,6 +53,9 @@ menu(ListWindowMenu, "PS2 Paper")
 	item("Clear selection") {
 		dotted;
 	}
+	item("Dimension units") {
+		submenu(ListWindowDimensionMenu);
+	}
 	item("Refresh");
 }
 
@@ -60,4 +63,11 @@ menu(ListWindowSelectionMenu, "Selection")
 {
 	item("Write size");
 	item("Run snippet");
+}
+
+menu(ListWindowDimensionMenu, "Dimension units")
+{
+	item("Millimeters");
+	item("Inches");
+	item("Points");
 }

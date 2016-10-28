@@ -105,11 +105,15 @@
 #define LIST_MENU_SELECTION 0
 #define LIST_MENU_SELECT_ALL 1
 #define LIST_MENU_CLEAR_SELECTION 2
-#define LIST_MENU_REFRESH 3
+#define LIST_MENU_DIMENSION_UNITS 3
+#define LIST_MENU_REFRESH 4
 
 #define LIST_SELECTION_MENU_WRITE 0
 #define LIST_SELECTION_MENU_RUN 1
 
+#define LIST_DIMENSION_MENU_MM 0
+#define LIST_DIMENSION_MENU_INCH 1
+#define LIST_DIMENSION_MENU_POINT 2
 
 /* The number of columns in the window. */
 
@@ -162,6 +166,7 @@ static wimp_w			list_pane = NULL;			/**< The list pane handle.				*/
 
 static wimp_menu		*list_window_menu = NULL;		/**< The list window menu.				*/
 static wimp_menu		*list_window_selection_menu = NULL;	/**< The list window selection submenu.			*/
+static wimp_menu		*list_window_dimension_menu = NULL;	/**< The list window display unit menu.			*/
 
 static struct columns_block	*list_columns = NULL;			/**< The column handler for the list window columns.	*/
 
@@ -192,7 +197,7 @@ static void list_select_all(void);
 static void list_select_none(void);
 static void list_write_selected_files(void);
 static void list_launch_selected_files(void);
-
+static void list_set_dimensions(enum list_units units);
 
 
 /* Line position calculations.
@@ -234,6 +239,7 @@ void list_initialise(osspriteop_area *sprites)
 
 	list_window_menu = templates_get_menu("ListWindowMenu");
 	list_window_selection_menu = templates_get_menu("ListWindowSelectionMenu");
+	list_window_dimension_menu = templates_get_menu("ListWindowDimensionMenu");
 	ihelp_add_menu(list_window_menu, "ListMenu");
 
 	/* Load the List Window and List Window Pane definitions. */
@@ -306,11 +312,9 @@ void list_initialise(osspriteop_area *sprites)
 	event_add_window_icon_radio(list_pane, LIST_MM_ICON, FALSE);
 	event_add_window_icon_radio(list_pane, LIST_POINT_ICON, FALSE);
 
-	icons_set_radio_group_selected(list_pane, list_display_units, 3, LIST_MM_ICON, LIST_INCH_ICON, LIST_POINT_ICON);
-
 	/* Default the display units to millimeters. */
 
-	list_display_units = LIST_UNITS_MM;
+	list_set_dimensions(LIST_UNITS_MM);
 
 	/* Allocate a token amount of memory to initialise the flex block. */
 
@@ -388,18 +392,15 @@ static void list_toolbar_click_handler(wimp_pointer *pointer)
 			list_select_none();
 		break;
 	case LIST_MM_ICON:
-		list_display_units = LIST_UNITS_MM;
-		windows_redraw(list_window);
+		list_set_dimensions(LIST_UNITS_MM);
 		break;
 
 	case LIST_INCH_ICON:
-		list_display_units = LIST_UNITS_INCH;
-		windows_redraw(list_window);
+		list_set_dimensions(LIST_UNITS_INCH);
 		break;
 
 	case LIST_POINT_ICON:
-		list_display_units = LIST_UNITS_POINT;
-		windows_redraw(list_window);
+		list_set_dimensions(LIST_UNITS_POINT);
 		break;
 	}
 }
@@ -442,6 +443,10 @@ static void list_menu_prepare(wimp_w w, wimp_menu *menu, wimp_pointer *pointer)
 	} else {
 		msgs_lookup("MenuSelection", menus_get_indirected_text_addr(list_window_menu, LIST_MENU_SELECTION), LIST_SELECT_MENU_LEN);
 	}
+
+	menus_tick_entry(list_window_dimension_menu, LIST_DIMENSION_MENU_MM, list_display_units == LIST_UNITS_MM);
+	menus_tick_entry(list_window_dimension_menu, LIST_DIMENSION_MENU_INCH, list_display_units == LIST_UNITS_INCH);
+	menus_tick_entry(list_window_dimension_menu, LIST_DIMENSION_MENU_POINT, list_display_units == LIST_UNITS_POINT);
 
 	menus_shade_entry(list_window_menu, LIST_MENU_SELECTION, list_selection_count == 0);
 	menus_shade_entry(list_window_menu, LIST_MENU_CLEAR_SELECTION, list_selection_count == 0);
@@ -534,6 +539,22 @@ static void list_menu_selection(wimp_w w, wimp_menu *menu, wimp_selection *selec
 	case LIST_MENU_CLEAR_SELECTION:
 		list_select_none();
 		list_selection_from_menu = FALSE;
+		break;
+
+	case LIST_MENU_DIMENSION_UNITS:
+		switch(selection->items[1]) {
+		case LIST_DIMENSION_MENU_MM:
+			list_set_dimensions(LIST_UNITS_MM);
+			break;
+
+		case LIST_DIMENSION_MENU_INCH:
+			list_set_dimensions(LIST_UNITS_INCH);
+			break;
+			
+		case LIST_DIMENSION_MENU_POINT:
+			list_set_dimensions(LIST_UNITS_POINT);
+			break;
+		}
 		break;
 
 	case LIST_MENU_REFRESH:
@@ -1181,4 +1202,13 @@ static void list_launch_selected_files(void)
 			paper_launch_file(list_index[i].index);
 		}
 	}
+}
+
+static void list_set_dimensions(enum list_units units)
+{
+	list_display_units = units;
+	icons_set_radio_group_selected(list_pane, units, 3, LIST_MM_ICON, LIST_INCH_ICON, LIST_POINT_ICON);
+
+	if (windows_get_open(list_window))
+		windows_redraw(list_window);
 }
