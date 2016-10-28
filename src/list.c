@@ -898,6 +898,9 @@ void list_rescan_paper_definitions(void)
 	extent.y0 = new_extent;
 
 	wimp_set_extent(list_window, &extent);
+
+	if (windows_get_open(list_window))
+		windows_redraw(list_window);
 }
 
 
