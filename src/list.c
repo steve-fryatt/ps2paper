@@ -87,18 +87,20 @@
 /* The toolbar pane icons. */
 
 #define LIST_REFRESH_ICON 0
-#define LIST_SELECT_ICON 1
+#define LIST_WRITE_ICON 1
+#define LIST_RUN_ICON 2
+#define LIST_SELECT_ICON 3
 
-#define LIST_NAME_HEADING_ICON 2
-#define LIST_WIDTH_HEADING_ICON 3
-#define LIST_HEIGHT_HEADING_ICON 4
-#define LIST_SIZE_HEADING_ICON 5
-#define LIST_FILENAME_HEADING_ICON 6
-#define LIST_STATUS_HEADING_ICON 7
+#define LIST_INCH_ICON 4
+#define LIST_MM_ICON 5
+#define LIST_POINT_ICON 6
 
-#define LIST_INCH_ICON 8
-#define LIST_MM_ICON 9
-#define LIST_POINT_ICON 10
+#define LIST_NAME_HEADING_ICON 7
+#define LIST_WIDTH_HEADING_ICON 8
+#define LIST_HEIGHT_HEADING_ICON 9
+#define LIST_SIZE_HEADING_ICON 10
+#define LIST_FILENAME_HEADING_ICON 11
+#define LIST_STATUS_HEADING_ICON 12
 
 /* The menu entries. */
 
@@ -181,6 +183,7 @@ static osbool			list_selection_from_menu = FALSE;	/**< TRUE if the selection cam
 
 static void list_click_handler(wimp_pointer *pointer);
 static void list_toolbar_click_handler(wimp_pointer *pointer);
+static void list_toolbar_set_buttons(void);
 static void list_menu_prepare(wimp_w w, wimp_menu *menu, wimp_pointer *pointer);
 static void list_menu_warning(wimp_w w, wimp_menu *menu, wimp_message_menu_warning *warning);
 static void list_menu_selection(wimp_w w, wimp_menu *menu, wimp_selection *selection);
@@ -315,6 +318,7 @@ void list_initialise(osspriteop_area *sprites)
 	/* Default the display units to millimeters. */
 
 	list_set_dimensions(LIST_UNITS_MM);
+	list_toolbar_set_buttons();
 
 	/* Allocate a token amount of memory to initialise the flex block. */
 
@@ -385,6 +389,12 @@ static void list_toolbar_click_handler(wimp_pointer *pointer)
 		paper_read_definitions();
 		windows_redraw(list_window);
 		break;
+	case LIST_WRITE_ICON:
+		list_write_selected_files();
+		break;
+	case LIST_RUN_ICON:
+		list_launch_selected_files();
+		break;
 	case LIST_SELECT_ICON:
 		if (pointer->buttons == wimp_CLICK_SELECT)
 			list_select_all();
@@ -405,6 +415,11 @@ static void list_toolbar_click_handler(wimp_pointer *pointer)
 	}
 }
 
+static void list_toolbar_set_buttons(void)
+{
+	icons_set_shaded(list_pane, LIST_WRITE_ICON, list_selection_count == 0);
+	icons_set_shaded(list_pane, LIST_RUN_ICON, list_selection_count == 0);
+}
 
 /**
  * Prepare the list window menu for (re)-opening.
@@ -840,6 +855,8 @@ void list_rescan_paper_definitions(void)
 	list_selection_row = -1;
 	list_selection_from_menu = FALSE;
 
+	list_toolbar_set_buttons();
+
 	paper = paper_get_definitions();
 
 	if (list_index != NULL) {
@@ -1048,6 +1065,8 @@ static void list_select_click_select(int row, int column)
 
 	wimp_force_redraw(window.w, window.xscroll, LINE_BASE(row),
 			window.xscroll + (window.visible.x1 - window.visible.x0), LINE_Y1(row));
+
+	list_toolbar_set_buttons();
 }
 
 
@@ -1091,6 +1110,8 @@ static void list_select_click_adjust(int row, int column)
 
 	wimp_force_redraw(window.w, window.xscroll, LINE_BASE(row),
 			window.xscroll + (window.visible.x1 - window.visible.x0), LINE_Y1(row));
+
+	list_toolbar_set_buttons();
 }
 
 
@@ -1122,6 +1143,8 @@ static void list_select_all(void)
 					window.xscroll + (window.visible.x1 - window.visible.x0), LINE_Y1(i));
 		}
 	}
+
+	list_toolbar_set_buttons();
 }
 
 
@@ -1170,6 +1193,8 @@ static void list_select_none(void)
 	}
 
 	list_selection_count = 0;
+
+	list_toolbar_set_buttons();
 }
 
 static void list_write_selected_files(void)
