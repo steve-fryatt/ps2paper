@@ -46,6 +46,11 @@ PaperStatUnkn:Unknown
 PaperStatOK:Correct
 PaperStatNOK:Incorrect
 
+# Menu Texts
+
+MenuSelection:Selection
+MenuPaper:Paper '%0'
+
 # Messages and errors
 
 NoSprites:The application sprites file could not be opened.
@@ -83,7 +88,9 @@ Help.IconBarMenu.00:\Rsee information about PS2Paper.
 Help.IconBarMenu.01:\Sread the online manual.
 Help.IconBarMenu.02:\Squit PS2Paper.
 
-Help.ListMenu.00:\Swrite new PS2 dimension files back to disc for the selected items.
+Help.ListMenu.00:\Rperform actions on the currently selected paper definitions.
+Help.ListMenu.0000:\Swrite new PS2 dimension files back to disc for the selected paper definitions.
+Help.ListMenu.0001:\Srun the selected snippet files (hold Shift to open them in an editor).
 Help.ListMenu.01:\Sselect all of the paper definitions.
 Help.ListMenu.02:\Sclear the current selection.
 Help.ListTB.Refresh/Help.ListMenu.03:\Srefresh the details of the paper definitions.

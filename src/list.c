@@ -72,6 +72,7 @@
 /* Memory allocation. */
 
 #define LIST_ICON_BUFFER_LEN 128					/**< The scratch buffer used for formatting text for display.		*/
+#define LIST_SELECT_MENU_LEN 150					/**< The amount of space allocated for the selection menu item.		*/
 
 /* The main window icons. */
 
@@ -101,10 +102,14 @@
 
 /* The menu entries. */
 
-#define LIST_MENU_WRITE_SELECTED 0
+#define LIST_MENU_SELECTION 0
 #define LIST_MENU_SELECT_ALL 1
 #define LIST_MENU_CLEAR_SELECTION 2
 #define LIST_MENU_REFRESH 3
+
+#define LIST_SELECTION_MENU_WRITE 0
+#define LIST_SELECTION_MENU_RUN 1
+
 
 /* The number of columns in the window. */
 
@@ -156,6 +161,7 @@ static wimp_w			list_window = NULL;			/**< The list window handle.				*/
 static wimp_w			list_pane = NULL;			/**< The list pane handle.				*/
 
 static wimp_menu		*list_window_menu = NULL;		/**< The list window menu.				*/
+static wimp_menu		*list_window_selection_menu = NULL;	/**< The list window selection submenu.			*/
 
 static struct columns_block	*list_columns = NULL;			/**< The column handler for the list window columns.	*/
 
@@ -185,6 +191,8 @@ static void list_select_click_adjust(int row, int column);
 static void list_select_all(void);
 static void list_select_none(void);
 static void list_write_selected_files(void);
+static void list_launch_selected_files(void);
+
 
 
 /* Line position calculations.
@@ -225,6 +233,7 @@ void list_initialise(osspriteop_area *sprites)
 	/* Set up the List Window menu definition. */
 
 	list_window_menu = templates_get_menu("ListWindowMenu");
+	list_window_selection_menu = templates_get_menu("ListWindowSelectionMenu");
 	ihelp_add_menu(list_window_menu, "ListMenu");
 
 	/* Load the List Window and List Window Pane definitions. */
@@ -406,6 +415,7 @@ static void list_toolbar_click_handler(wimp_pointer *pointer)
 
 static void list_menu_prepare(wimp_w w, wimp_menu *menu, wimp_pointer *pointer)
 {
+	struct paper_size	*paper;
 	wimp_window_state	state;
 	int			row;
 
@@ -424,7 +434,19 @@ static void list_menu_prepare(wimp_w w, wimp_menu *menu, wimp_pointer *pointer)
 		}
 	}
 
-	menus_shade_entry(list_window_menu, LIST_MENU_WRITE_SELECTED, list_selection_count == 0);
+
+	if (list_selection_count == 1) {
+		paper = paper_get_definitions();
+		msgs_param_lookup("MenuPaper", menus_get_indirected_text_addr(list_window_menu, LIST_MENU_SELECTION), LIST_SELECT_MENU_LEN,
+				paper[list_index[list_selection_row].index].name, NULL, NULL, NULL);
+	} else {
+		msgs_lookup("MenuSelection", menus_get_indirected_text_addr(list_window_menu, LIST_MENU_SELECTION), LIST_SELECT_MENU_LEN);
+	}
+
+	menus_shade_entry(list_window_menu, LIST_MENU_SELECTION, list_selection_count == 0);
+	menus_shade_entry(list_window_menu, LIST_MENU_CLEAR_SELECTION, list_selection_count == 0);
+	menus_shade_entry(list_window_selection_menu, LIST_SELECTION_MENU_WRITE, list_selection_count == 0);
+	menus_shade_entry(list_window_selection_menu, LIST_SELECTION_MENU_RUN, list_selection_count == 0);
 }
 
 
@@ -492,8 +514,16 @@ static void list_menu_selection(wimp_w w, wimp_menu *menu, wimp_selection *selec
 //		}
 //		break;
 
-	case LIST_MENU_WRITE_SELECTED:
-		list_write_selected_files();
+	case LIST_MENU_SELECTION:
+		switch(selection->items[1]) {
+		case LIST_SELECTION_MENU_WRITE:
+			list_write_selected_files();
+			break;
+
+		case LIST_SELECTION_MENU_RUN:
+			list_launch_selected_files();
+			break;
+		}
 		break;
 
 	case LIST_MENU_SELECT_ALL:
@@ -1137,4 +1167,18 @@ static void list_write_selected_files(void)
 	}
 
 	paper_read_definitions();
+}
+
+static void list_launch_selected_files(void)
+{
+	int	i;
+
+	if (list_selection_count == 0)
+		return;
+
+	for (i = 0; i < list_index_count; i++) {
+		if ((list_index[i].type == LIST_LINE_TYPE_PAPER) && (list_index[i].flags & LIST_LINE_FLAGS_SELECTED)) {
+			paper_launch_file(list_index[i].index);
+		}
+	}
 }

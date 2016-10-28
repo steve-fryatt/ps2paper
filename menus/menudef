@@ -42,12 +42,22 @@ menu(IconBarMenu, "PS2 Paper")
 
 menu(ListWindowMenu, "PS2 Paper")
 {
-	item("Write files") {
+	item("Selection") {
 		dotted;
+		indirected(150);
+		submenu(ListWindowSelectionMenu) {
+			always;
+		}
 	}
 	item("Select all");
 	item("Clear selection") {
 		dotted;
 	}
 	item("Refresh");
+}
+
+menu(ListWindowSelectionMenu, "Selection")
+{
+	item("Write size");
+	item("Run snippet");
 }

@@ -143,8 +143,8 @@ void paper_write_file(int definition)
 	if (definition < 0 || definition >= paper_count || paper_sizes[definition].ps2_file_status == PAPER_FILE_STATUS_CORRECT)
 		return;
 
-	if (paper_sizes[definition].ps2_file_status == PAPER_FILE_STATUS_UNKNOWN &&
-			error_msgs_param_report_question("Overwrite", "OverwriteB", paper_sizes[definition].ps2_file, NULL, NULL, NULL) == 2)
+	if ((paper_sizes[definition].ps2_file_status == PAPER_FILE_STATUS_UNKNOWN) &&
+			(error_msgs_param_report_question("Overwrite", "OverwriteB", paper_sizes[definition].ps2_file, NULL, NULL, NULL) == 2))
 		return;
 
 	paper_write_pagesize(paper_sizes + definition, "<Choices$Write>.Printers.ps.Paper");
