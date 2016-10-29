@@ -137,27 +137,43 @@ static struct columns_definition list_column_definitions[] = {
 	{ LIST_STATUS_ICON, LIST_STATUS_HEADING_ICON, 164, LIST_LINE_OFFSET, LIST_LINE_OFFSET, -1, -1, COLUMNS_FLAGS_NONE }
 };
 
+/**
+ * Measurement units for the paper definition display.
+ */
+
 enum list_units {
-	LIST_UNITS_MM = 0,
-	LIST_UNITS_INCH = 1,
-	LIST_UNITS_POINT = 2
+	LIST_UNITS_MM = 0,						/**< Display in millimetres.				*/
+	LIST_UNITS_INCH = 1,						/**< Display in inches.					*/
+	LIST_UNITS_POINT = 2						/**< Display in points.					*/
 };
+
+/**
+ * The types of line which can be displayed in the List Window.
+ */
 
 enum list_line_type {
-	LIST_LINE_TYPE_SEPARATOR,
-	LIST_LINE_TYPE_PAPER
+	LIST_LINE_TYPE_SEPARATOR,					/**< A paper source heading separator.			*/
+	LIST_LINE_TYPE_PAPER						/**< A paper definition entry.				*/
 };
+
+/**
+ * Flags relating to the lines in the List Window.
+ */
 
 enum list_line_flags {
-	LIST_LINE_FLAGS_NONE = 0,
-	LIST_LINE_FLAGS_SELECTED = 1
+	LIST_LINE_FLAGS_NONE = 0,					/**< No flags set.					*/
+	LIST_LINE_FLAGS_SELECTED = 1					/**< The line is selected.				*/
 };
 
+/**
+ * Paper List window line redraw data structure.
+ */
+
 struct list_redraw {
-	enum list_line_type	type;
-	enum list_line_flags	flags;
-	int			index;
-	enum paper_source	source;
+	enum list_line_type	type;					/**< The type of line to be redrawn.			*/
+	enum list_line_flags	flags;					/**< The line flags.					*/
+	int			index;					/**< The paper definition index for a paper line.	*/
+	enum paper_source	source;					/**< The paper source section for a separator line.	*/
 };
 
 static wimp_window		*list_window_def = NULL;		/**< The list window definition.			*/
@@ -415,11 +431,18 @@ static void list_toolbar_click_handler(wimp_pointer *pointer)
 	}
 }
 
+
+/**
+ * Update the toolbar button selection states to reflect the current
+ * window selection status.
+ */
+
 static void list_toolbar_set_buttons(void)
 {
 	icons_set_shaded(list_pane, LIST_WRITE_ICON, list_selection_count == 0);
 	icons_set_shaded(list_pane, LIST_RUN_ICON, list_selection_count == 0);
 }
+
 
 /**
  * Prepare the list window menu for (re)-opening.
@@ -1033,6 +1056,7 @@ static void list_double_click_select(int row, int column)
 	paper_launch_file(list_index[row].index);
 }
 
+
 /**
  * Update the current selection based on a select click over a row of the
  * window.
@@ -1119,7 +1143,7 @@ static void list_select_click_adjust(int row, int column)
 
 
 /**
- * Select all of the rows in the list window.
+ * Select all of the paper sizes in the list window.
  */
 
 static void list_select_all(void)
@@ -1152,7 +1176,7 @@ static void list_select_all(void)
 
 
 /**
- * Clear the selection in the list window.
+ * Clear the current selection in the list window.
  */
 
 static void list_select_none(void)
@@ -1200,6 +1224,11 @@ static void list_select_none(void)
 	list_toolbar_set_buttons();
 }
 
+
+/**
+ * Write snippet files for all of the currently selected paper sizes.
+ */
+
 static void list_write_selected_files(void)
 {
 	int	i;
@@ -1218,6 +1247,12 @@ static void list_write_selected_files(void)
 	paper_read_definitions();
 }
 
+
+/**
+ * Launch the paper snippet files for all of the currently selected
+ * paper sizes.
+ */
+
 static void list_launch_selected_files(void)
 {
 	int	i;
@@ -1231,6 +1266,14 @@ static void list_launch_selected_files(void)
 		}
 	}
 }
+
+
+/**
+ * Set the dimensions used in the paper list, updating the various display
+ * locations to match and refreshing the list.
+ * 
+ * \param units			The new display units to use.
+ */
 
 static void list_set_dimensions(enum list_units units)
 {

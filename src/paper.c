@@ -113,15 +113,39 @@ void paper_read_definitions(void)
 }
 
 
+/**
+ * Return the number of paper definitions which are currently stored.
+ *
+ * \return			The number of paper definitions.
+ */
+
 size_t paper_get_definition_count(void)
 {
 	return paper_count;
 }
 
+
+/**
+ * Return a pointer to the paper definition array. This points into a flex
+ * heap, so the pointer will not remain valid if anything causes the heap
+ * to shift.
+ * 
+ * \return			Pointer to the first entry in the array.
+ */
+
 struct paper_size *paper_get_definitions(void)
 {
 	return paper_sizes;
 }
+
+
+/**
+ * Launch the snippet file relating to a paper definition, using a
+ * *Filer_Run command.
+ * 
+ * \param definition		The index into the definitions of the
+ *				definition to be launched.
+ */
 
 void paper_launch_file(int definition)
 {
@@ -138,6 +162,14 @@ void paper_launch_file(int definition)
 		error_report_os_error(error, wimp_ERROR_BOX_OK_ICON);
 }
 
+
+/**
+ * Write a new snipped file for a paper definition.
+ *
+ * \param definition		The index into the definitions of the
+ *				definition to be launched.
+ */
+
 void paper_write_file(int definition)
 {
 	if (definition < 0 || definition >= paper_count || paper_sizes[definition].ps2_file_status == PAPER_FILE_STATUS_CORRECT)
@@ -151,7 +183,6 @@ void paper_write_file(int definition)
 
 	return;
 }
-
 
 
 /**
@@ -346,6 +377,14 @@ static void paper_scan_sizes(void)
 }
 
 
+/**
+ * Read a PS2 snippet and compare its contents to a paper size definition.
+ * 
+ * \param *paper		Pointer to the paper definition to be read.
+ * \param *file_path		Pointer to the filename to read from.
+ * \return			The status of the PS2 snippet in relation to the paper size.
+ */
+
 static enum paper_file_status paper_read_pagesize(struct paper_size *paper, char *file)
 {
 	FILE	*in;
@@ -427,6 +466,15 @@ osbool paper_ensure_ps2_file_folder(void)
 
 	return TRUE;
 }
+
+
+/**
+ * Write a PS2 snippet file for a paper definition.
+ * 
+ * \param *paper		Pointer to the paper definition to be written.
+ * \param *file_path		Pointer to the filename to write to.
+ * \return			TRUE if successful; FALSE if an error occurred.
+ */
 
 static osbool paper_write_pagesize(struct paper_size *paper, char *file_path)
 {

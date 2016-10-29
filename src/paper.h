@@ -38,6 +38,10 @@
 
 #define PAPER_NAME_LEN 128
 
+/**
+ * The maximum amount of space allocated for a paper file name.
+ */
+
 #define PAPER_FILE_LEN 128
 
 /* Data structures */
@@ -74,6 +78,9 @@ enum paper_file_status {
 	PAPER_FILE_STATUS_INCORRECT				/**< There is a file, but the size is wrong.			*/
 };
 
+/**
+ * The definition of a paper size.
+ */
 
 struct paper_size {
 	char			name[PAPER_NAME_LEN];		/**< The Printers name for the paper				*/
@@ -99,14 +106,42 @@ void paper_initialise(void);
 
 void paper_read_definitions(void);
 
+/**
+ * Return the number of paper definitions which are currently stored.
+ *
+ * \return			The number of paper definitions.
+ */
+
 size_t paper_get_definition_count(void);
+
+/**
+ * Return a pointer to the paper definition array. This points into a flex
+ * heap, so the pointer will not remain valid if anything causes the heap
+ * to shift.
+ * 
+ * \return			Pointer to the first entry in the array.
+ */
 
 struct paper_size *paper_get_definitions(void);
 
+/**
+ * Launch the snippet file relating to a paper definition, using a
+ * *Filer_Run command.
+ * 
+ * \param definition		The index into the definitions of the
+ *				definition to be launched.
+ */
+
 void paper_launch_file(int definition);
 
-void paper_write_file(int definition);
+/**
+ * Write a new snipped file for a paper definition.
+ *
+ * \param definition		The index into the definitions of the
+ *				definition to be launched.
+ */
 
+void paper_write_file(int definition);
 
 /**
  * Ensure that the Paper folder exists on Choices$Write, ready for writing
