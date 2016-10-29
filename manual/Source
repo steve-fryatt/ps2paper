@@ -206,6 +206,8 @@ f23 = Corpus.Bold.Oblique     14   Bold 21  Italic 22  Both 23
 
 # Fonts 24 to 31 are reserved for the manuals themselves.
 
+f31 = Selwyn                  14
+
 # The styles..
 
 fStd       = f0
