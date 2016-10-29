@@ -130,7 +130,7 @@ Once installed on disc, <cite>PS2Paper</cite> can be started in the usual way by
 
 The window shows a list of the paper sizes available to the PostScript Level&nbsp;2 printer driver, grouped into the three sections that they are held in within Printers. Although these all appear in the dialogue which opens when selecting <menu>Edit paper sizes...</menu> from the <cite>Printers</cite> iconbar menu, the fact that there are three distinct places which hold paper definitions explains why it&rsquo;s possible to have more than one paper size with the same name.
 
-Each row shows the width and height of the paper, in either millimetres, inches or points (as selected from the toolbar). Note that this is the overall paper dimension, before any margins are applied. To the right of these <icon>Width</icon> and <icon>Height</icon> columns is the <icon>Size</icon> column, which shows either &lsquo;OK&rsquo; or &lsquo;Ambiguous&rsquo; &ndash; we will come on to this soon.
+Each row shows the width and height of the paper, in either millimetres, inches or points (as selected from the toolbar, or from the <menu>Dimension units</menu> submenu). Note that this is the overall paper dimension, before any margins are applied. To the right of these <icon>Width</icon> and <icon>Height</icon> columns is the <icon>Size</icon> column, which shows either &lsquo;OK&rsquo; or &lsquo;Ambiguous&rsquo; &ndash; we will come on to this soon.
 
 The <icon>File Name</icon> column shows the name of the PostScript snippet file associated with the paper. The name of the file is derived from the name of the paper associated with it, converted to lower case and truncated at the first space. As a result, a paper definition named &lsquo;A4&rsquo; would have a snippet file called <file>a4</file> &ndash; but then, so would a paper size with the name &lsquo;A4&nbsp;Paper&rsquo; or even &lsquo;A4&nbsp;(Generic&nbsp;PS)&rsquo;.
 
@@ -138,9 +138,9 @@ There&rsquo;s clearly a risk that with this ambiguity in file names, two or more
 
 Finally, the <icon>Status</icon> column shows what <cite>PS2Paper</cite> can make of the snippet file and its contents. If there is no file of the given name on the system, the file icon is greyed out and the status shows as &lsquo;Missing&rsquo;; if there is a file, but it wasn&rsquo;t created by <cite>PS2Paper</cite>, the column shows &lsquo;Unknown&rsquo;. Otherwise, the column shows &lsquo;Correct&rsquo; if the snippet contains the same dimensions as shown in the <icon>Width</icon> and <icon>Height</icon> columns, or &lsquo;Incorrect&rsquo; if there&rsquo;s a discrepancy.
 
-Double-clicking on a file icon in the <icon>File Name</icon> column will run it in the usual way: hold down <key>shift</key> to load a snippet into a text editor for inspection.
+Double-clicking on a file icon in the <icon>File Name</icon> column will run it in the usual way: hold down <key>shift</key> to load a snippet into a text editor for inspection. The selected files can also be run by selecting <menu>Selection &msep; Run snippet</menu> from the menu.
 
-The different paper definitions can be selected by clicking <mouse>select</mouse> or <mouse>adjust</mouse> on the items in the <icon>Paper Name</icon> column. To update the contents of the PostScript snippet files for the selected papers so that they contain the correct paper dimensions (or create new ones if the files don&rsquo;t exist), choose <menu>Write files</menu> from the menu.
+The different paper definitions can be selected by clicking <mouse>select</mouse> or <mouse>adjust</mouse> on the items in the <icon>Paper Name</icon> column. To update the contents of the PostScript snippet files for the selected papers so that they contain the correct paper dimensions (or create new ones if the files don&rsquo;t exist), choose <menu>Selection &msep; Write files</menu> from the menu.
 
 </chapter>
 
@@ -150,7 +150,7 @@ The different paper definitions can be selected by clicking <mouse>select</mouse
 
 Here is a list of the versions of <cite>PS2Paper</cite>, along with all the changes made.
 
-<subhead title="0.10 (28 September 2016)">
+<subhead title="0.10 (29 October 2016)">
 
 First beta release, for feedback and comment.
 
