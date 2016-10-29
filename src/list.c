@@ -91,8 +91,8 @@
 #define LIST_RUN_ICON 2
 #define LIST_SELECT_ICON 3
 
-#define LIST_INCH_ICON 4
-#define LIST_MM_ICON 5
+#define LIST_MM_ICON 4
+#define LIST_INCH_ICON 5
 #define LIST_POINT_ICON 6
 
 #define LIST_NAME_HEADING_ICON 7
