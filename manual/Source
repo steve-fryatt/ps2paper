@@ -118,7 +118,7 @@ In addition to this manual, interactive help is fully supported by the applicati
 
 To install <cite>PS2Paper</cite>, drag the <file>!PS2Paper</file> application directory from the archive to a suitable location on your hard disc. Once copied, <cite>PS2Paper</cite> can be started by double-clicking in the usual way.
 
-<cite>PS2Paper</cite> is 32-bit neutral, and requires the 32-bit Shared C Library from Castle to be installed.  If you do not have this, it can be obtained from <link ref="#url http://www.iyonix.com/32bit/system.shtml">http://www.iyonix.com/32bit/system.shtml</link> with full installation instructions.
+<cite>PS2Paper</cite> is 26/32-bit neutral, and should therefore run on all hardware systems as long as the 32-bit Shared C Library is installed. If required, this can be found in the System Resources on RISC&nbsp;OS Open Ltd&rsquo;s website at <link ref="https://www.riscosopen.org/content/downloads/common">https://www.riscosopen.org/content/downloads/common</link>.
 
 </chapter>
 
