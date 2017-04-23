@@ -1,4 +1,4 @@
-/* Copyright 2013-2016, Stephen Fryatt (info@stevefryatt.org.uk)
+/* Copyright 2013-2017, Stephen Fryatt (info@stevefryatt.org.uk)
  *
  * This file is part of PS2Paper:
  *
@@ -176,7 +176,7 @@ void paper_write_file(int definition)
 		return;
 
 	if ((paper_sizes[definition].ps2_file_status == PAPER_FILE_STATUS_UNKNOWN) &&
-			(error_msgs_param_report_question("Overwrite", "OverwriteB", paper_sizes[definition].ps2_file, NULL, NULL, NULL) == 2))
+			(error_msgs_param_report_question("Overwrite", "OverwriteB", paper_sizes[definition].ps2_file, NULL, NULL, NULL) == 4))
 		return;
 
 	paper_write_pagesize(paper_sizes + definition, "<Choices$Write>.Printers.ps.Paper");
