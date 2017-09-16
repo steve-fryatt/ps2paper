@@ -159,7 +159,7 @@ First beta release, for feedback and comment.
 Alpha release, for feedback and comment.
 
 <list>
-<li>First Release.
+<li>Remove all unbounded string operations from source code.
 </list>
 
 </chapter>
