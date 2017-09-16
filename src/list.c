@@ -1,4 +1,4 @@
-/* Copyright 2016, Stephen Fryatt (info@stevefryatt.org.uk)
+/* Copyright 2016-2017, Stephen Fryatt (info@stevefryatt.org.uk)
  *
  * This file is part of PS2Paper:
  *
@@ -50,6 +50,7 @@
 #include "sflib/ihelp.h"
 #include "sflib/menus.h"
 #include "sflib/msgs.h"
+#include "sflib/string.h"
 #include "sflib/templates.h"
 #include "sflib/windows.h"
 
@@ -762,8 +763,7 @@ static void list_redraw_handler(wimp_draw *redraw)
 				icon[LIST_WIDTH_ICON].extent.y0 = LINE_Y0(y);
 				icon[LIST_WIDTH_ICON].extent.y1 = LINE_Y1(y);
 
-				snprintf(buffer, LIST_ICON_BUFFER_LEN, unit_format, (double) (paper[list_index[y].index].width / unit_scale));
-				buffer[LIST_ICON_BUFFER_LEN - 1] = '\0';
+				string_printf(buffer, LIST_ICON_BUFFER_LEN, unit_format, (double) (paper[list_index[y].index].width / unit_scale));
 
 				wimp_plot_icon(&(icon[LIST_WIDTH_ICON]));
 
@@ -772,8 +772,7 @@ static void list_redraw_handler(wimp_draw *redraw)
 				icon[LIST_HEIGHT_ICON].extent.y0 = LINE_Y0(y);
 				icon[LIST_HEIGHT_ICON].extent.y1 = LINE_Y1(y);
 
-				snprintf(buffer, LIST_ICON_BUFFER_LEN, unit_format, (double) (paper[list_index[y].index].height / unit_scale));
-				buffer[LIST_ICON_BUFFER_LEN - 1] = '\0';
+				string_printf(buffer, LIST_ICON_BUFFER_LEN, unit_format, (double) (paper[list_index[y].index].height / unit_scale));
 
 				wimp_plot_icon(&(icon[LIST_HEIGHT_ICON]));
 
@@ -990,10 +989,10 @@ static void list_decode_window_help(char *buffer, wimp_w w, wimp_i i, os_coord p
 
 	switch (list_index[row].type) {
 	case LIST_LINE_TYPE_PAPER:
-		sprintf(buffer, "Col%d", column);
+		string_printf(buffer, IHELP_INAME_LEN, "Col%d", column);
 		break;
 	case LIST_LINE_TYPE_SEPARATOR:
-		sprintf(buffer, "Separator");
+		string_printf(buffer, IHELP_INAME_LEN, "Separator");
 		break;
 	}
 }

@@ -56,6 +56,12 @@
 #include "list.h"
 
 /**
+ * The maximum length of a paper definition filename.
+ */
+
+#define PAPER_MAX_FILENAME_LENGTH 1024
+
+/**
  * The maximum length of a paper definition file line.
  */
 
@@ -155,8 +161,7 @@ void paper_launch_file(int definition)
 	if (definition < 0 || definition >= paper_count || paper_sizes[definition].ps2_file_status == PAPER_FILE_STATUS_MISSING)
 		return;
 
-	snprintf(buffer, PAPER_MAX_LINE_LEN, "%%Filer_Run -Shift Printers:ps.Paper.%s", paper_sizes[definition].ps2_file);
-	buffer[PAPER_MAX_LINE_LEN - 1] = '\0';
+	string_printf(buffer, PAPER_MAX_LINE_LEN, "%%Filer_Run -Shift Printers:ps.Paper.%s", paper_sizes[definition].ps2_file);
 	error = xos_cli(buffer);
 	if (error != NULL)
 		error_report_os_error(error, wimp_ERROR_BOX_OK_ICON);
@@ -271,7 +276,7 @@ static osbool paper_read_def_file(char *file, enum paper_source source)
 
 		if (strstr(clean, "pn:") == clean) {
 			data = string_strip_surrounding_whitespace(clean + 3);
-			strncpy(paper_name, data, PAPER_NAME_LEN);
+			string_copy(paper_name, data, PAPER_NAME_LEN);
 		} else if (strstr(clean, "pw:") == clean) {
 			data = string_strip_surrounding_whitespace(clean + 3);
 			paper_width = atoi(data);
@@ -286,7 +291,7 @@ static osbool paper_read_def_file(char *file, enum paper_source source)
 			if (paper_count < paper_allocation) {
 				paper_definition = paper_sizes + paper_count;
 
-				strncpy(paper_definition->name, paper_name, PAPER_NAME_LEN);
+				string_copy(paper_definition->name, paper_name, PAPER_NAME_LEN);
 				paper_definition->source = source;
 				paper_definition->width = paper_width;
 				paper_definition->height = paper_height;
@@ -301,8 +306,7 @@ static osbool paper_read_def_file(char *file, enum paper_source source)
 				string_tolower(paper_definition->ps2_file);
 
 				if (paper_definition->ps2_file[0] != '\0') {
-					snprintf(line, PAPER_MAX_LINE_LEN, "Printers:ps.Paper.%s", paper_definition->ps2_file);
-					line[PAPER_MAX_LINE_LEN - 1] = '\0';
+					string_printf(line, PAPER_MAX_LINE_LEN, "Printers:ps.Paper.%s", paper_definition->ps2_file);
 					error = xosfile_read_no_path(line, &type, NULL, NULL, NULL, NULL);
 
 					if (error == NULL && type == fileswitch_IS_FILE)
@@ -449,18 +453,15 @@ osbool paper_ensure_ps2_file_folder(void)
 	if (var_len == 0)
 		return FALSE;
 
-	snprintf(file_path, PAPER_MAX_LINE_LEN, "<Choices$Write>.Printers");
-	file_path[PAPER_MAX_LINE_LEN - 1] = '\0';
+	string_printf(file_path, PAPER_MAX_LINE_LEN, "<Choices$Write>.Printers");
 	if (osfile_read_no_path(file_path, NULL, NULL, NULL, NULL) == fileswitch_NOT_FOUND)
 		osfile_create_dir(file_path, 0);
 
-	snprintf(file_path, PAPER_MAX_LINE_LEN, "<Choices$Write>.Printers.ps");
-	file_path[PAPER_MAX_LINE_LEN - 1] = '\0';
+	string_printf(file_path, PAPER_MAX_LINE_LEN, "<Choices$Write>.Printers.ps");
 	if (osfile_read_no_path(file_path, NULL, NULL, NULL, NULL) == fileswitch_NOT_FOUND)
 		osfile_create_dir(file_path, 0);
 
-	snprintf(file_path, PAPER_MAX_LINE_LEN, "<Choices$Write>.Printers.ps.Paper");
-	file_path[PAPER_MAX_LINE_LEN - 1] = '\0';
+	string_printf(file_path, PAPER_MAX_LINE_LEN, "<Choices$Write>.Printers.ps.Paper");
 	if (osfile_read_no_path(file_path, NULL, NULL, NULL, NULL) == fileswitch_NOT_FOUND)
 		osfile_create_dir(file_path, 0);
 
@@ -479,12 +480,12 @@ osbool paper_ensure_ps2_file_folder(void)
 static osbool paper_write_pagesize(struct paper_size *paper, char *file_path)
 {
 	FILE	*out;
-	char	filename[1024];
+	char	filename[PAPER_MAX_FILENAME_LENGTH];
 
 	if (paper == NULL)
 		return FALSE;
 
-	snprintf(filename, sizeof(filename), "%s.%s", file_path, paper->ps2_file);
+	string_printf(filename, PAPER_MAX_FILENAME_LENGTH, "%s.%s", file_path, paper->ps2_file);
 
 	out = fopen(filename, "w");
 	if (out == NULL)
