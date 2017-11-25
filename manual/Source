@@ -160,6 +160,7 @@ Alpha release, for feedback and comment.
 
 <list>
 <li>Remove all unbounded string operations from source code.
+<li>Correctly ensure that a C99-friendly version of the Shared C Library is present (ticket&nbsp;#637).
 </list>
 
 </chapter>
