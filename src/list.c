@@ -351,7 +351,7 @@ void list_initialise(osspriteop_area *sprites)
 void list_open_window(void)
 {
 	windows_open_centred_on_screen(list_window);
-	windows_open_nested_as_toolbar(list_pane, list_window, LIST_TOOLBAR_HEIGHT - 4);
+	windows_open_nested_as_toolbar(list_pane, list_window, LIST_TOOLBAR_HEIGHT - 4, FALSE);
 }
 
 
