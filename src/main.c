@@ -1,4 +1,4 @@
-/* Copyright 2016-2017, Stephen Fryatt
+/* Copyright 2016-2020, Stephen Fryatt
  *
  * This file is part of PS2Paper:
  *
@@ -38,6 +38,7 @@
 
 /* OSLib header files */
 
+#include "oslib/osfile.h"
 #include "oslib/hourglass.h"
 #include "oslib/wimp.h"
 
@@ -126,7 +127,7 @@ static void main_poll_loop(void)
 		 * inline handlers shown here.
 		 */
 
-		if (!event_process_event(reason, &blk, 0)) {
+		if (!event_process_event(reason, &blk, 0, NULL)) {
 			switch (reason) {
 			case wimp_OPEN_WINDOW_REQUEST:
 				wimp_open_window(&(blk.open));
@@ -158,12 +159,17 @@ static void main_initialise(void)
 
 	hourglass_on();
 
+	/* Initialise the resources. */
+
 	string_copy(resources, "<PS2Paper$Dir>.Resources", MAIN_FILENAME_BUFFER_LEN);
-	resources_find_path(resources, MAIN_FILENAME_BUFFER_LEN);
+	if (!resources_initialise_paths(resources, MAIN_FILENAME_BUFFER_LEN, "PS2Paper$Language", "UK"))
+		error_report_fatal("Failed to initialise resources.");
 
 	/* Load the messages file. */
 
-	string_printf(res_temp, MAIN_FILENAME_BUFFER_LEN, "%s.Messages", resources);
+	if (!resources_find_file(resources, res_temp, MAIN_FILENAME_BUFFER_LEN, "Messages", osfile_TYPE_TEXT))
+		error_report_fatal("Failed to locate suitable Messages file.");
+
 	msgs_initialise(res_temp);
 
 	/* Initialise the error message system. */
@@ -193,7 +199,9 @@ static void main_initialise(void)
 
 	/* Load the menu structure. */
 
-	string_printf(res_temp, MAIN_FILENAME_BUFFER_LEN, "%s.Menus", resources);
+	if (!resources_find_file(resources, res_temp, MAIN_FILENAME_BUFFER_LEN, "Menus", osfile_TYPE_DATA))
+		error_msgs_param_report_fatal("BadResource", "Menus", NULL, NULL, NULL);
+
 	templates_load_menus(res_temp);
 
 	/* Load the window templates. */
@@ -204,7 +212,9 @@ static void main_initialise(void)
 
 //	main_wimp_sprites = sprites;
 
-	string_printf(res_temp, MAIN_FILENAME_BUFFER_LEN, "%s.Templates", resources);
+	if (!resources_find_file(resources, res_temp, MAIN_FILENAME_BUFFER_LEN, "Templates", osfile_TYPE_TEMPLATE))
+		error_msgs_param_report_fatal("BadResource", "Templates", NULL, NULL, NULL);
+
 	templates_open(res_temp);
 
 	/* Initialise the individual modules. */
