@@ -32,7 +32,7 @@ If you have any comments about {f/:PS2Paper}, or would like to report any bugs t
 Updates to {f/:PS2Paper} and more applications for RISC OS computers can be found on my website at <http://www.stevefryatt.org.uk/software/=>#url>.
 
 #Align Centre
-© Stephen Fryatt, 2013-2016 (<steve@stevefryatt.org.uk=>#url mailto:steve@stevefryatt.org.uk>)
+© Stephen Fryatt, 2013-2020 (<steve@stevefryatt.org.uk=>#url mailto:steve@stevefryatt.org.uk>)
 
 A plain text version of this manual is available <here=>*Filer_Run <PS2Paper$HelpText\>>.
 #Align Left
@@ -74,7 +74,7 @@ A plain text version of this manual is available <here=>*Filer_Run <PS2Paper$Hel
 =============================================================================
 PS2Paper - Manage PostScript 2 Paper Sizes                       Version $$version$$
 
-(c) Stephen Fryatt, 2013-2016                  $$date$$
+(c) Stephen Fryatt, 2013-2020                  $$date$$
 =============================================================================
 </literal>
 
@@ -154,13 +154,14 @@ Here is a list of the versions of <cite>PS2Paper</cite>, along with all the chan
 
 First beta release, for feedback and comment.
 
-<subhead title="Test Build">
+<subhead title="0.11 (28 July 2020)">
 
-Alpha release, for feedback and comment.
+Update to first beta release, for feedback and comment.
 
 <list>
 <li>Remove all unbounded string operations from source code.
 <li>Correctly ensure that a C99-friendly version of the Shared C Library is present (ticket&nbsp;#637).
+<li>Use ResConf-style system variables to identify resources.
 </list>
 
 </chapter>
