@@ -1,0 +1,25 @@
+Package: PS2Paper
+Version: 0.11-1
+Section: Printing
+Priority: Optional
+Maintainer: Stephen Fryatt <info@stevefryatt.org.uk>
+Standards-Version: 0.6.0
+Environment: arm
+Licence: Free
+Description: Control paper sizes when using the Level 2 PostScript printer drivers
+ PS2Paper is a utility to help manage the paper sizes used by the Level 2
+ PostScript printer driver supplied with RISC OS. Note that it is not required
+ when using the Level 3 PostScript printer drivers from John Tytgat and Martin
+ Wuerthner, as these handle paper dimensions themselves.
+ .
+ As standard, the Level 2 drivers don't handle paper sizes well: they rely on
+ small snippets of Postscript embedded in files deep inside !Printers to pass
+ the dimensions on to the printer, and there are many subtleties to the way in
+ which this process works.
+ .
+ PS2Paper is designed to take control and make the paper sizes work as the
+ user expects. It is especially useful when using the Level 2 drivers to
+ generate Postscript files for use with a PDF creator such as PrintPDF and
+ GhostScript.
+Homepage: http://www.stevefryatt.org.uk/software/ps2paper/
+Components: Apps.Printing.!PS2Paper (Movable)

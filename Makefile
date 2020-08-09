@@ -1,4 +1,4 @@
-# Copyright 2016, Stephen Fryatt
+# Copyright 2016-2020, Stephen Fryatt
 #
 # This file is part of PS2Paper:
 #
@@ -29,6 +29,9 @@ ARCHIVE := ps2paper
 APP := !PS2Paper
 SHHELP := PS2Paper,3d6
 HTMLHELP := manual.html
+
+PACKAGE := PS2Paper
+PACKAGELOC := Printing
 
 OBJS = columns.o iconbar.o list.o main.o paper.o
 
