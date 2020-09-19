@@ -1,0 +1,11 @@
+.vscode
+build/Licence,fff
+build/manual.html
+build/ReadMe,fff
+build/!PS2Paper/!Help,ffb
+build/!PS2Paper/!RunImage,ff8
+build/!PS2Paper/Resources/UK/HelpText,fff
+build/!PS2Paper/Resources/UK/Menus,ffd
+build/!PS2Paper/Resources/UK/PS2Paper,3d6
+build/package
+obj
