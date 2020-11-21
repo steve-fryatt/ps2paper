@@ -1,4 +1,4 @@
-/* Copyright 2013-2017, Stephen Fryatt (info@stevefryatt.org.uk)
+/* Copyright 2013-2020, Stephen Fryatt (info@stevefryatt.org.uk)
  *
  * This file is part of PS2Paper:
  *
@@ -268,7 +268,7 @@ static osbool paper_read_def_file(char *file, enum paper_source source)
 	paper_height = 0;
 
 	while (fgets(line, PAPER_MAX_LINE_LEN, in) != NULL) {
-		string_ctrl_zero_terminate(line);
+		string_ctrl_zero_terminate(line, PAPER_MAX_LINE_LEN);
 		clean = string_strip_surrounding_whitespace(line);
 
 		if (*clean == '\0' || *clean == '#')
